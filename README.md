@@ -10,10 +10,45 @@ streaks, and badges later.
 React + Vite + TypeScript + Tailwind CSS + React Router.
 
 ## Getting started
+
+### Prerequisites
+Install these on your computer first:
+
+- **[Node.js](https://nodejs.org/) 18 or newer** — includes `npm`. Verify with
+  `node -v` and `npm -v`. (On macOS you can also `brew install node`.)
+- **[Git](https://git-scm.com/downloads)** — for cloning the repo. Verify with `git --version`.
+- A code editor such as **[VS Code](https://code.visualstudio.com/)** (optional but recommended).
+
+No database, API keys, or `.env` file are required — the app runs entirely in the
+browser and persists progress to the browser's localStorage.
+
+### 1. Get the code
+```bash
+git clone https://github.com/KevinCui1/DreamCollege-Team-B.git
+cd DreamCollege-Team-B
+```
+If you already cloned it earlier, pull the latest changes instead:
+```bash
+git pull
+```
+
+### 2. Install dependencies
+This reads `package.json` and downloads everything into a local `node_modules/`
+folder (git-ignored, so it won't exist on a fresh clone):
 ```bash
 npm install
-npm run dev      # start the dev server (open the printed URL)
-npm run build    # type-check + production build
+```
+
+### 3. Run it
+```bash
+npm run dev      # start the dev server, then open the printed URL (usually http://localhost:5173)
+```
+The page hot-reloads as you edit files. Stop the server with `Ctrl+C`.
+
+### Other commands
+```bash
+npm run build    # type-check + produce an optimized production build in dist/
+npm run preview  # serve the production build locally to verify it
 ```
 
 ## Structure
