@@ -1,10 +1,19 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { navigation, activityPath } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
+import { useRank } from "../context/RankContext";
 
 export default function DashboardHome() {
   const { completedCount, totalCount, isComplete } = useCompletion();
+  const { markDashboardVisited } = useRank();
   const pct = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+
+  // Opening the dashboard counts as completing the dashboard milestone (toward
+  // the Navigator rank). Tracked in rank state, not the activity progress count.
+  useEffect(() => {
+    markDashboardVisited();
+  }, [markDashboardVisited]);
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">

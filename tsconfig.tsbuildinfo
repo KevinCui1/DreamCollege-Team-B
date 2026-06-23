@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/navgroup.tsx","./src/components/rankupoverlay.tsx","./src/components/sidebar.tsx","./src/context/completioncontext.tsx","./src/context/rankcontext.tsx","./src/data/navigation.ts","./src/data/ranks.ts","./src/pages/activitypage.tsx","./src/pages/dashboardhome.tsx"],"errors":true,"version":"5.9.3"}
