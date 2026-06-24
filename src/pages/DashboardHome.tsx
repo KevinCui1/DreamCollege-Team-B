@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { navigation, activityPath } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
 import { useRank } from "../context/RankContext";
+import NationalRanking from "../components/NationalRanking";
 
 export default function DashboardHome() {
   const { completedCount, totalCount, isComplete } = useCompletion();
@@ -41,6 +42,8 @@ export default function DashboardHome() {
           />
         </div>
       </div>
+
+      <NationalRanking />
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {navigation.map((group) => {
