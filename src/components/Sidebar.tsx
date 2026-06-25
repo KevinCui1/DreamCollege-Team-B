@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Link, NavLink } from "react-router-dom";
+import { Map, Menu } from "lucide-react";
 import { navigation } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
+import { useAchievement } from "../context/AchievementContext";
 import NavGroup from "./NavGroup";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 
 export default function Sidebar({ collapsed, onToggle }: Props) {
   const { completedCount, totalCount } = useCompletion();
+  const { earnedMilestoneCount, totalMilestoneCount } = useAchievement();
   const pct = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
 
   return (
@@ -38,6 +40,36 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
       {!collapsed && (
         <>
           <nav className="flex-1 overflow-y-auto px-3 py-4">
+            <NavLink
+              to="/achievements"
+              end
+              className={({ isActive }) =>
+                `mb-3 flex items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition ${
+                  isActive
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm"
+                    : "border border-slate-200 text-slate-700 hover:bg-slate-50"
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Map
+                    size={20}
+                    strokeWidth={2}
+                    className={isActive ? "text-white" : "text-indigo-600"}
+                  />
+                  <span className="flex-1">Achievement Map</span>
+                  <span
+                    className={`text-xs font-normal ${
+                      isActive ? "text-white/70" : "text-slate-400"
+                    }`}
+                  >
+                    {earnedMilestoneCount}/{totalMilestoneCount}
+                  </span>
+                </>
+              )}
+            </NavLink>
+
             {navigation.map((group) => (
               <NavGroup key={group.slug} group={group} />
             ))}

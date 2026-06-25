@@ -1,12 +1,23 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { navigation, activityPath } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
 import { badges } from "../data/badges";
 import Badge from "../components/Badge";
+import { useRank } from "../context/RankContext";
+import NationalRanking from "../components/NationalRanking";
+import NextStepBanner from "../components/NextStepBanner";
 
 export default function DashboardHome() {
   const { completedCount, totalCount, isComplete } = useCompletion();
+  const { markDashboardVisited } = useRank();
   const pct = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
+
+  // Opening the dashboard counts as completing the dashboard milestone (toward
+  // the Navigator rank). Tracked in rank state, not the activity progress count.
+  useEffect(() => {
+    markDashboardVisited();
+  }, [markDashboardVisited]);
 
   return (
     <div className="mx-auto max-w-4xl px-8 py-10">
@@ -46,6 +57,12 @@ export default function DashboardHome() {
           />
         ))}
       </div>
+
+      <div className="mt-6">
+        <NextStepBanner />
+      </div>
+
+      <NationalRanking />
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {navigation.map((group) => {

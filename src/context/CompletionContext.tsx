@@ -18,6 +18,10 @@ type CompletionContextValue = {
   complete: (path: string) => void;
   /** Toggle / undo completion (handy for testing the gamification loop). */
   reset: (path: string) => void;
+  /** Wipe all completion progress. */
+  resetAll: () => void;
+  /** Raw list of completed activity paths (lets consumers derive reactively). */
+  completedPaths: string[];
   completedCount: number;
   totalCount: number;
 };
@@ -59,15 +63,21 @@ export function CompletionProvider({ children }: { children: ReactNode }) {
     setCompleted((prev) => prev.filter((p) => p !== path));
   }, []);
 
+  const resetAll = useCallback(() => {
+    setCompleted([]);
+  }, []);
+
   const value = useMemo<CompletionContextValue>(
     () => ({
       isComplete,
       complete,
       reset,
+      resetAll,
+      completedPaths: completed,
       completedCount: completed.length,
       totalCount: totalActivities,
     }),
-    [isComplete, complete, reset, completed.length],
+    [isComplete, complete, reset, resetAll, completed],
   );
 
   return (

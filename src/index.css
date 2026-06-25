@@ -28,4 +28,134 @@ body {
   animation-name: confetti-fall;
   animation-timing-function: ease-in;
   animation-fill-mode: forwards;
+/* ── Rank-up overlay (game-style chevron promotion) ─────────────────────────
+   A fixed 3s promotion sequence that then auto-closes (unskippable): the lavender
+   field fades in, the emblem card settles, the newly-earned chevron snaps into
+   place with a single impact ring and a tight card "thunk", the rank name
+   clip-reveals, the tier track advances and locks the new node, and a
+   confirmation lockup fades in. Every motion class is applied conditionally in
+   React, so prefers-reduced-motion users get the fully composed final state
+   (default styles) with no animation at all. Delays are tuned to the 3s window. */
+
+/* Lavender field fades in. */
+@keyframes rankup-field {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.rankup-field {
+  animation: rankup-field 0.25s ease-out both;
+}
+
+/* Emblem card settles in — scale up, no overshoot. */
+@keyframes rankup-card {
+  0% { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.rankup-card {
+  animation: rankup-card 0.3s cubic-bezier(0.2, 0, 0, 1) 0.05s both;
+}
+
+/* The newly-earned chevron snaps in — firm, no springy overshoot. */
+@keyframes rankup-chevron-new {
+  0% { opacity: 0; transform: scale(0.4) translateY(-6px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.rankup-chevron-new {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0;
+  animation: rankup-chevron-new 0.4s cubic-bezier(0.2, 0, 0, 1) 0.7s forwards;
+}
+
+/* A single purple impact ring expands and fades as the chevron lands. */
+@keyframes rankup-impact {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  35% { opacity: 0.6; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.7); }
+}
+.rankup-impact {
+  opacity: 0;
+  animation: rankup-impact 0.6s ease-out 0.72s forwards;
+}
+
+/* Tight card "thunk" at impact — a quick firm pulse that settles back. */
+@keyframes rankup-thunk {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+.rankup-thunk {
+  animation: rankup-thunk 0.35s ease-out 0.72s both;
+}
+
+/* The rank name clip-reveals top-to-bottom. */
+@keyframes rankup-title {
+  0% { clip-path: inset(0 0 100% 0); transform: translateY(8px); }
+  100% { clip-path: inset(0 0 0 0); transform: translateY(0); }
+}
+.rankup-title {
+  clip-path: inset(0 0 100% 0);
+  animation: rankup-title 0.5s cubic-bezier(0.22, 1, 0.36, 1) 1.15s both;
+}
+
+/* The earned tier rule advances to the new node. */
+@keyframes rankup-track-rule {
+  to { stroke-dashoffset: 0; }
+}
+.rankup-track-rule {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: rankup-track-rule 0.55s cubic-bezier(0.4, 0, 0.2, 1) 1.7s forwards;
+}
+
+/* The new tier node locks in. */
+@keyframes rankup-track-node {
+  0% { transform: scale(0.3); }
+  100% { transform: scale(1); }
+}
+.rankup-track-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: rankup-track-node 0.35s cubic-bezier(0.2, 0, 0, 1) 2.05s both;
+}
+
+/* Supporting text (eyebrow, tagline, confirmation) rises in; delays set inline. */
+@keyframes rankup-fade {
+  0% { opacity: 0; transform: translateY(6px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.rankup-fade {
+  opacity: 0;
+  animation: rankup-fade 0.45s ease-out both;
+}
+
+/* Halo rings slowly orbit the emblem (instrument-dial feel). */
+@keyframes rankup-orbit {
+  to { transform: rotate(360deg); }
+}
+.rankup-orbit {
+  transform-origin: center;
+  animation: rankup-orbit 60s linear infinite;
+}
+
+/* The halo group gently breathes — a subtle scale/opacity pulse. */
+@keyframes rankup-halo {
+  0%, 100% { transform: scale(1); opacity: 0.85; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+.rankup-halo {
+  transform-origin: center;
+  animation: rankup-halo 4s ease-in-out infinite;
+}
+
+/* ── Achievement toast slide-in ─────────────────────────────────────────────── */
+@keyframes achievementSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }

@@ -6,11 +6,14 @@ import { useCompletion } from "../context/CompletionContext";
 import Confetti from "../components/Confetti";
 
 const CONFETTI_DURATION_MS = 4500;
+import { milestones } from "../data/achievements";
+import { useAchievement } from "../context/AchievementContext";
 
 export default function ActivityPage() {
   const { groupSlug, itemSlug } = useParams();
   const { isComplete, complete } = useCompletion();
   const [showConfetti, setShowConfetti] = useState(false);
+  const { earnMilestone } = useAchievement();
 
   const match = findActivity(groupSlug, itemSlug);
 
@@ -80,6 +83,11 @@ export default function ActivityPage() {
             <button
               type="button"
               onClick={handleComplete}
+              onClick={() => {
+                complete(path);
+                const milestone = milestones.find((m) => m.triggerPath === path);
+                if (milestone) earnMilestone(milestone.id);
+              }}
               className="mt-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:from-indigo-500 hover:to-purple-500"
             >
               Complete Activity
