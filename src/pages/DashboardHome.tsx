@@ -7,9 +7,10 @@ import Badge from "../components/Badge";
 import { useRank } from "../context/RankContext";
 import NationalRanking from "../components/NationalRanking";
 import NextStepBanner from "../components/NextStepBanner";
+import StreakBar from "../components/StreakBar";
 
 export default function DashboardHome() {
-  const { completedCount, totalCount, isComplete } = useCompletion();
+  const { completedCount, totalCount, isComplete, streakDay } = useCompletion();
   const { markDashboardVisited } = useRank();
   const pct = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
 
@@ -45,6 +46,8 @@ export default function DashboardHome() {
           />
         </div>
       </div>
+
+      <StreakBar currentDay={streakDay} />
 
       <div className="mt-6 flex flex-wrap justify-center gap-6">
         {badges.map((badge) => (
