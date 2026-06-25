@@ -28,6 +28,8 @@ body {
   animation-name: confetti-fall;
   animation-timing-function: ease-in;
   animation-fill-mode: forwards;
+}
+
 /* ── Rank-up overlay (game-style chevron promotion) ─────────────────────────
    A fixed 3s promotion sequence that then auto-closes (unskippable): the lavender
    field fades in, the emblem card settles, the newly-earned chevron snaps into
