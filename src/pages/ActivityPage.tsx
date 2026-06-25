@@ -1,11 +1,16 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { activityPath, findActivity } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
+import Confetti from "../components/Confetti";
+
+const CONFETTI_DURATION_MS = 4500;
 
 export default function ActivityPage() {
   const { groupSlug, itemSlug } = useParams();
   const { isComplete, complete } = useCompletion();
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const match = findActivity(groupSlug, itemSlug);
 
@@ -24,8 +29,15 @@ export default function ActivityPage() {
   const path = activityPath(group.slug, item.slug);
   const done = isComplete(path);
 
+  const handleComplete = () => {
+    complete(path);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), CONFETTI_DURATION_MS);
+  };
+
   return (
     <div className="mx-auto max-w-3xl px-8 py-10">
+      {showConfetti && <Confetti />}
       <nav className="mb-6 text-sm text-slate-400">
         <Link to="/" className="hover:text-slate-600">
           Dashboard
@@ -67,7 +79,7 @@ export default function ActivityPage() {
             </p>
             <button
               type="button"
-              onClick={() => complete(path)}
+              onClick={handleComplete}
               className="mt-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:from-indigo-500 hover:to-purple-500"
             >
               Complete Activity

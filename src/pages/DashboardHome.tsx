@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import { navigation, activityPath } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
+import { badges } from "../data/badges";
+import Badge from "../components/Badge";
 
 export default function DashboardHome() {
   const { completedCount, totalCount, isComplete } = useCompletion();
@@ -31,6 +33,18 @@ export default function DashboardHome() {
             style={{ width: `${pct}%` }}
           />
         </div>
+      </div>
+
+      <div className="mt-6 flex flex-wrap justify-center gap-6">
+        {badges.map((badge) => (
+          <Badge
+            key={badge.id}
+            icon={badge.icon}
+            label={badge.label}
+            color={badge.color}
+            earned={badge.isEarned(completedCount, totalCount)}
+          />
+        ))}
       </div>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
