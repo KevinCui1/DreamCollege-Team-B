@@ -1,6 +1,7 @@
 import { RotateCcw } from "lucide-react";
 import { useCompletion } from "../context/CompletionContext";
 import { useRank } from "../context/RankContext";
+import { useAchievement } from "../context/AchievementContext";
 
 /**
  * Always-on-screen control that wipes every bit of saved progress:
@@ -10,17 +11,19 @@ import { useRank } from "../context/RankContext";
 export default function ResetButton() {
   const { resetAll, completedCount } = useCompletion();
   const { resetRank } = useRank();
+  const { resetAchievements } = useAchievement();
 
   const handleReset = () => {
     if (
       !window.confirm(
-        "Reset all progress? This clears your completed activities and rank.",
+        "Reset all progress? This clears your completed activities, rank, and achievements.",
       )
     ) {
       return;
     }
     resetAll();
     resetRank();
+    resetAchievements();
   };
 
   return (

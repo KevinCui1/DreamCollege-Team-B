@@ -4,6 +4,7 @@ import { navigation, activityPath } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
 import { useRank } from "../context/RankContext";
 import NationalRanking from "../components/NationalRanking";
+import NextStepBanner from "../components/NextStepBanner";
 
 export default function DashboardHome() {
   const { completedCount, totalCount, isComplete } = useCompletion();
@@ -41,6 +42,10 @@ export default function DashboardHome() {
             style={{ width: `${pct}%` }}
           />
         </div>
+      </div>
+
+      <div className="mt-6">
+        <NextStepBanner />
       </div>
 
       <NationalRanking />

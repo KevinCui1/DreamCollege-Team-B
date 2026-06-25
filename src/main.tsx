@@ -4,6 +4,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { CompletionProvider } from "./context/CompletionContext";
 import { RankProvider } from "./context/RankContext";
+import { AchievementProvider } from "./context/AchievementContext";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
@@ -11,7 +12,9 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <CompletionProvider>
         <RankProvider>
-          <App />
+          <AchievementProvider>
+            <App />
+          </AchievementProvider>
         </RankProvider>
       </CompletionProvider>
     </BrowserRouter>

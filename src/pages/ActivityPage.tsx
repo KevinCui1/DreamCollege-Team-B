@@ -2,10 +2,13 @@ import { Link, useParams } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { activityPath, findActivity } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
+import { milestones } from "../data/achievements";
+import { useAchievement } from "../context/AchievementContext";
 
 export default function ActivityPage() {
   const { groupSlug, itemSlug } = useParams();
   const { isComplete, complete } = useCompletion();
+  const { earnMilestone } = useAchievement();
 
   const match = findActivity(groupSlug, itemSlug);
 
@@ -67,7 +70,11 @@ export default function ActivityPage() {
             </p>
             <button
               type="button"
-              onClick={() => complete(path)}
+              onClick={() => {
+                complete(path);
+                const milestone = milestones.find((m) => m.triggerPath === path);
+                if (milestone) earnMilestone(milestone.id);
+              }}
               className="mt-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:from-indigo-500 hover:to-purple-500"
             >
               Complete Activity

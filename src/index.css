@@ -132,3 +132,15 @@ body {
   transform-origin: center;
   animation: rankup-halo 4s ease-in-out infinite;
 }
+
+/* ── Achievement toast slide-in ─────────────────────────────────────────────── */
+@keyframes achievementSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
