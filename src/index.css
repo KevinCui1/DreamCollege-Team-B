@@ -13,6 +13,21 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+.animate-confetti-fall {
+  animation-name: confetti-fall;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
 /* ── Rank-up overlay (game-style chevron promotion) ─────────────────────────
    A fixed 3s promotion sequence that then auto-closes (unskippable): the lavender
    field fades in, the emblem card settles, the newly-earned chevron snaps into

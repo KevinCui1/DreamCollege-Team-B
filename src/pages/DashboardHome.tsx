@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { navigation, activityPath } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
+import { badges } from "../data/badges";
+import Badge from "../components/Badge";
 import { useRank } from "../context/RankContext";
 import NationalRanking from "../components/NationalRanking";
 import NextStepBanner from "../components/NextStepBanner";
@@ -42,6 +44,18 @@ export default function DashboardHome() {
             style={{ width: `${pct}%` }}
           />
         </div>
+      </div>
+
+      <div className="mt-6 flex flex-wrap justify-center gap-6">
+        {badges.map((badge) => (
+          <Badge
+            key={badge.id}
+            icon={badge.icon}
+            label={badge.label}
+            color={badge.color}
+            earned={badge.isEarned(completedCount, totalCount)}
+          />
+        ))}
       </div>
 
       <div className="mt-6">
