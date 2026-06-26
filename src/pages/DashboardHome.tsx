@@ -7,14 +7,13 @@ import Badge from "../components/Badge";
 import { useRank } from "../context/RankContext";
 import NationalRanking from "../components/NationalRanking";
 import NextStepBanner from "../components/NextStepBanner";
+import ProgressSummaryCard from "../components/ProgressSummaryCard";
 
 export default function DashboardHome() {
   const { completedCount, totalCount, isComplete } = useCompletion();
   const { markDashboardVisited } = useRank();
   const pct = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
 
-  // Opening the dashboard counts as completing the dashboard milestone (toward
-  // the Navigator rank). Tracked in rank state, not the activity progress count.
   useEffect(() => {
     markDashboardVisited();
   }, [markDashboardVisited]);
@@ -27,6 +26,7 @@ export default function DashboardHome() {
         your overall progress.
       </p>
 
+      {/* Overall progress bar */}
       <div className="mt-8 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-sm">
         <div className="flex items-end justify-between">
           <div>
@@ -46,6 +46,11 @@ export default function DashboardHome() {
         </div>
       </div>
 
+      {/* Progress Summary Card — Salma Ali */}
+      <div className="mt-6">
+        <ProgressSummaryCard />
+      </div>
+
       <div className="mt-6 flex flex-wrap justify-center gap-6">
         {badges.map((badge) => (
           <Badge
@@ -57,13 +62,10 @@ export default function DashboardHome() {
           />
         ))}
       </div>
-
       <div className="mt-6">
         <NextStepBanner />
       </div>
-
       <NationalRanking />
-
       <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {navigation.map((group) => {
           const Icon = group.icon;
