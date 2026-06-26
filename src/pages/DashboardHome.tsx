@@ -46,7 +46,7 @@ export default function DashboardHome() {
         </div>
       </div>
 
-      {/* Progress Summary Card — Salma Ali */}
+      
       <div className="mt-6">
         <ProgressSummaryCard />
       </div>
