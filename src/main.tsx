@@ -5,6 +5,7 @@ import App from "./App";
 import { CompletionProvider } from "./context/CompletionContext";
 import { RankProvider } from "./context/RankContext";
 import { AchievementProvider } from "./context/AchievementContext";
+import { StudentProfileProvider } from "./context/StudentProfileContext";
 import "./index.css";
 
 createRoot(document.getElementById("root")!).render(
@@ -13,7 +14,9 @@ createRoot(document.getElementById("root")!).render(
       <CompletionProvider>
         <RankProvider>
           <AchievementProvider>
-            <App />
+            <StudentProfileProvider>
+              <App />
+            </StudentProfileProvider>
           </AchievementProvider>
         </RankProvider>
       </CompletionProvider>

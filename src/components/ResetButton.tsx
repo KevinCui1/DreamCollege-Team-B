@@ -2,6 +2,7 @@ import { RotateCcw } from "lucide-react";
 import { useCompletion } from "../context/CompletionContext";
 import { useRank } from "../context/RankContext";
 import { useAchievement } from "../context/AchievementContext";
+import { useStudentProfile } from "../context/StudentProfileContext";
 
 /**
  * Always-on-screen control that wipes every bit of saved progress:
@@ -12,6 +13,7 @@ export default function ResetButton() {
   const { resetAll, completedCount } = useCompletion();
   const { resetRank } = useRank();
   const { resetAchievements } = useAchievement();
+  const { resetProfile } = useStudentProfile();
 
   const handleReset = () => {
     if (
@@ -24,6 +26,7 @@ export default function ResetButton() {
     resetAll();
     resetRank();
     resetAchievements();
+    resetProfile();
   };
 
   return (

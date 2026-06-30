@@ -19,8 +19,24 @@ Install these on your computer first:
 - **[Git](https://git-scm.com/downloads)** — for cloning the repo. Verify with `git --version`.
 - A code editor such as **[VS Code](https://code.visualstudio.com/)** (optional but recommended).
 
-No database, API keys, or `.env` file are required — the app runs entirely in the
-browser and persists progress to the browser's localStorage.
+The app runs entirely in the browser and persists progress to localStorage. The
+only optional piece of configuration is an Anthropic API key for the **Best Next
+Task** feature (see below) — everything else works with no setup.
+
+### Optional: Best Next Task (Claude-powered recommendation)
+After the Career Discovery Quiz is complete, a **Best Next Task** button appears
+next to the Reset button. It asks Claude to recommend the student's single best
+next step. To enable it, add an API key:
+
+```bash
+cp .env.example .env.local      # then edit .env.local and set ANTHROPIC_API_KEY
+```
+
+The key is read **only** by the dev/preview server (`vite.config.ts` →
+`vite-plugins/bestNextTaskApi.ts`, exposed at `POST /api/best-next-task`) and is
+never bundled into client code. Restart `npm run dev` after editing `.env.local`.
+Without a key the button still appears, but generating a recommendation shows a
+"key not configured" message.
 
 ### 1. Get the code
 ```bash
