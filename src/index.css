@@ -161,3 +161,13 @@ body {
     transform: translateY(0) scale(1);
   }
 }
+
+/* ── XP segment bar shimmer ──────────────────────────────────────────────────
+   A single white highlight sweeps right across the filled portion. */
+@keyframes xp-shimmer {
+  0%   { transform: translateX(-100%) skewX(-12deg); }
+  100% { transform: translateX(300%)  skewX(-12deg); }
+}
+.xp-shimmer {
+  animation: xp-shimmer 2.8s ease-in-out infinite;
+}

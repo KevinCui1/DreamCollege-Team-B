@@ -8,6 +8,7 @@ import { useRank } from "../context/RankContext";
 import NationalRanking from "../components/NationalRanking";
 import NextStepBanner from "../components/NextStepBanner";
 import ProgressSummaryCard from "../components/ProgressSummaryCard";
+import ExperienceBar from "../components/ExperienceBar";
 
 export default function DashboardHome() {
   const { completedCount, totalCount, isComplete } = useCompletion();
@@ -26,8 +27,13 @@ export default function DashboardHome() {
         your overall progress.
       </p>
 
+      {/* Experience bar */}
+      <div className="mt-8">
+        <ExperienceBar />
+      </div>
+
       {/* Overall progress bar */}
-      <div className="mt-8 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-sm">
+      <div className="mt-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-sm">
         <div className="flex items-end justify-between">
           <div>
             <p className="text-sm/relaxed opacity-90">Activities completed</p>
