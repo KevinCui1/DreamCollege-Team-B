@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, ArrowLeft } from "lucide-react";
+import { CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react";
 import { quizQuestions, totalQuizQuestions } from "../data/quiz";
 import {
   useStudentProfile,
@@ -7,36 +7,32 @@ import {
 } from "../context/StudentProfileContext";
 
 type Props = {
-  /** Whether the quiz activity has already been marked complete. */
   done: boolean;
-  /** Fires the existing activity-completion flow (milestone + confetti). */
   onComplete: () => void;
 };
 
-/**
- * The Career Discovery Quiz UI. Steps through a few single-select questions,
- * persists answers to StudentProfileContext, and calls `onComplete` (which runs
- * ActivityPage's existing completion logic) when finished. When the activity is
- * already complete it shows a summary with the option to retake.
- */
 export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
   const { quizAnswers, setQuizAnswers } = useStudentProfile();
 
-  // Start in summary mode if the quiz was already completed with stored answers.
   const [taking, setTaking] = useState(!done || !quizAnswers);
   const [step, setStep] = useState(0);
-  const [answers, setAnswers] = useState<QuizAnswers>(quizAnswers ?? {});
+  
+  // Keep local state explicitly in sync with saved answers or empty dictionary
+  const [answers, setAnswers] = useState<QuizAnswers>(() => quizAnswers ?? {});
 
   const question = quizQuestions[step];
   const isLast = step === totalQuizQuestions - 1;
-  const selected = answers[question?.id];
+  const currentSelection = answers[question?.id];
 
-  const handleSelect = (value: string) => {
-    const next = { ...answers, [question.id]: value };
-    setAnswers(next);
+  const handleSelectValue = (value: string) => {
+    setAnswers((prev) => ({ ...prev, [question.id]: value }));
+  };
 
+  const handleNext = () => {
+    if (!currentSelection) return; // Prevent advancing without a selection
+    
     if (isLast) {
-      setQuizAnswers(next);
+      setQuizAnswers(answers);
       if (!done) onComplete();
       setTaking(false);
     } else {
@@ -44,24 +40,35 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
     }
   };
 
-  // Summary / completed view.
+  const handleRetake = () => {
+    setStep(0);
+    setAnswers({}); // Clear past buffer to avoid partial pollution if aborted
+    setTaking(true);
+  };
+
+  // Progress calculations fixed
+  const progressPercent = Math.round(((step + 1) / totalQuizQuestions) * 100);
+
+  // Summary View
   if (!taking) {
     return (
-      <div>
-        <div className="flex items-center gap-2 text-emerald-600">
-          <CheckCircle2 size={24} />
-          <span className="text-lg font-semibold">Quiz completed</span>
+      <div className="space-y-6">
+        <div>
+          <div className="flex items-center gap-2 text-emerald-600">
+            <CheckCircle2 size={24} />
+            <span className="text-lg font-semibold">Quiz completed</span>
+          </div>
+          <p className="mt-2 text-slate-500 text-sm">
+            Your answers are saved and power your{" "}
+            <span className="font-medium text-slate-700">Best Next Task</span>{" "}
+            recommendation. Look for the button in the bottom-right corner.
+          </p>
         </div>
-        <p className="mt-2 text-slate-500">
-          Your answers are saved and power your{" "}
-          <span className="font-medium text-slate-700">Best Next Task</span>{" "}
-          recommendation. Look for the button in the bottom-right corner.
-        </p>
 
-        <dl className="mt-6 space-y-3">
+        <dl className="space-y-3">
           {quizQuestions.map((q) => {
-            const ans = (quizAnswers ?? answers)[q.id];
-            const label = q.options.find((o) => o.value === ans)?.label;
+            const currentAns = quizAnswers?.[q.id];
+            const label = q.options.find((o) => o.value === currentAns)?.label;
             return (
               <div
                 key={q.id}
@@ -70,7 +77,7 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
                 <dt className="text-sm font-medium text-slate-700">
                   {q.prompt}
                 </dt>
-                <dd className="mt-0.5 text-sm text-indigo-600">
+                <dd className="mt-0.5 text-sm font-semibold text-indigo-600">
                   {label ?? "—"}
                 </dd>
               </div>
@@ -80,11 +87,8 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
 
         <button
           type="button"
-          onClick={() => {
-            setStep(0);
-            setTaking(true);
-          }}
-          className="mt-6 rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+          onClick={handleRetake}
+          className="rounded-xl border border-slate-200 px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
         >
           Retake quiz
         </button>
@@ -92,7 +96,7 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
     );
   }
 
-  // Question stepper.
+  // Question Stepper View
   return (
     <div>
       <div className="mb-6">
@@ -100,29 +104,32 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
           <span>
             Question {step + 1} of {totalQuizQuestions}
           </span>
-          <span>{Math.round((step / totalQuizQuestions) * 100)}%</span>
+          <span>{progressPercent}%</span>
         </div>
         <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 transition-all"
-            style={{ width: `${(step / totalQuizQuestions) * 100}%` }}
+            className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
       <h2 className="text-xl font-semibold text-slate-800">{question.prompt}</h2>
 
-      <div className="mt-5 space-y-3">
+      {/* Accessibility enhancement: role="radiogroup" */}
+      <div className="mt-5 space-y-3" role="radiogroup" aria-label={question.prompt}>
         {question.options.map((opt) => {
-          const isSelected = selected === opt.value;
+          const isSelected = currentSelection === opt.value;
           return (
             <button
               key={opt.value}
               type="button"
-              onClick={() => handleSelect(opt.value)}
+              role="radio"
+              aria-checked={isSelected}
+              onClick={() => handleSelectValue(opt.value)}
               className={`flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left text-sm font-medium transition ${
                 isSelected
-                  ? "border-indigo-400 bg-indigo-50 text-indigo-700"
+                  ? "border-indigo-400 bg-indigo-50 text-indigo-700 shadow-sm"
                   : "border-slate-200 text-slate-700 hover:border-indigo-300 hover:bg-slate-50"
               }`}
             >
@@ -141,16 +148,34 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
         })}
       </div>
 
-      {step > 0 && (
+      <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-4">
+        {step > 0 ? (
+          <button
+            type="button"
+            onClick={() => setStep((s) => s - 1)}
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
+          >
+            <ArrowLeft size={15} />
+            Back
+          </button>
+        ) : (
+          <div /> /* Layout spacer */
+        )}
+
         <button
           type="button"
-          onClick={() => setStep((s) => s - 1)}
-          className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
+          disabled={!currentSelection}
+          onClick={handleNext}
+          className={`inline-flex items-center gap-1.5 rounded-xl px-5 py-2 text-sm font-semibold text-white shadow-sm transition ${
+            currentSelection
+              ? "bg-indigo-600 hover:bg-indigo-500 cursor-pointer"
+              : "bg-slate-300 cursor-not-allowed"
+          }`}
         >
-          <ArrowLeft size={15} />
-          Back
+          {isLast ? "Submit Quiz" : "Next"}
+          {!isLast && <ArrowRight size={15} />}
         </button>
-      )}
+      </div>
     </div>
   );
 }
