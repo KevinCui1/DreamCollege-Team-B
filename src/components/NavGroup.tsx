@@ -20,10 +20,10 @@ export default function NavGroup({ group, defaultOpen = true }: Props) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-3 text-left text-white shadow-sm transition hover:from-indigo-500 hover:to-purple-500"
+        className="flex w-full items-center justify-between rounded-lg border border-slate-900/[0.06] bg-white/50 px-4 py-2.5 text-left text-slate-700 transition hover:bg-white/70"
       >
-        <span className="flex items-center gap-3 font-semibold">
-          <Icon size={20} strokeWidth={2} />
+        <span className="flex items-center gap-3 font-display font-semibold">
+          <Icon size={18} strokeWidth={2} className="text-slate-500" />
           {group.label}
         </span>
         <ChevronDown
@@ -42,10 +42,10 @@ export default function NavGroup({ group, defaultOpen = true }: Props) {
                 <NavLink
                   to={path}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 rounded-lg px-3 py-2 text-[15px] transition ${
+                    `flex items-center gap-2 rounded-md px-3 py-2 text-[15px] transition ${
                       isActive
-                        ? "font-semibold text-indigo-600"
-                        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                        ? "bg-white/70 font-semibold text-violet-700"
+                        : "text-slate-600 hover:bg-white/60 hover:text-slate-900"
                     }`
                   }
                 >

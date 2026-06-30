@@ -1,113 +1,72 @@
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
-import { navigation, activityPath } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
 import { badges } from "../data/badges";
 import Badge from "../components/Badge";
 import { useRank } from "../context/RankContext";
 import NationalRanking from "../components/NationalRanking";
-import NextStepBanner from "../components/NextStepBanner";
-import ProgressSummaryCard from "../components/ProgressSummaryCard";
 import ExperienceBar from "../components/ExperienceBar";
+import { glassCard, eyebrow } from "../theme";
 
 export default function DashboardHome() {
-  const { completedCount, totalCount, isComplete } = useCompletion();
+  const { completedCount, totalCount } = useCompletion();
   const { markDashboardVisited } = useRank();
-  const pct = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
 
   useEffect(() => {
     markDashboardVisited();
   }, [markDashboardVisited]);
 
+  const earnedBadges = badges.filter((b) =>
+    b.isEarned(completedCount, totalCount),
+  ).length;
+
   return (
-    <div className="mx-auto max-w-4xl px-8 py-10">
-      <h1 className="text-3xl font-bold text-slate-800">Student Dashboard</h1>
-      <p className="mt-2 text-slate-500">
-        Work through your activities below. Each one you complete counts toward
-        your overall progress.
-      </p>
+    <div className="mx-auto max-w-5xl space-y-8 px-8 py-12">
+      {/* ── Hero header ── */}
+      <header>
+        <p className={eyebrow}>Your College Journey</p>
+        <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-slate-900">
+          Student Dashboard
+        </h1>
+        <p className="mt-2 max-w-2xl text-[15px] leading-relaxed text-slate-500">
+          Work through your activities below. Each one you complete moves you up
+          the ranks and adds to your overall progress.
+        </p>
+      </header>
 
-      {/* Experience bar */}
-      <div className="mt-8">
-        <ExperienceBar />
-      </div>
+      {/* ── Experience bar ── */}
+      <ExperienceBar />
 
-      {/* Overall progress bar */}
-      <div className="mt-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white shadow-sm">
-        <div className="flex items-end justify-between">
+      {/* ── Milestones ── */}
+      <section className={`${glassCard} p-7`}>
+        <div className="mb-6 flex items-center justify-between">
           <div>
-            <p className="text-sm/relaxed opacity-90">Activities completed</p>
-            <p className="text-4xl font-bold">
-              {completedCount}
-              <span className="text-xl font-medium opacity-80"> / {totalCount}</span>
+            <h2 className="font-display text-lg font-bold tracking-tight text-slate-900">
+              Milestones
+            </h2>
+            <p className="mt-0.5 text-sm text-slate-500">
+              Badges you earn as your progress grows.
             </p>
           </div>
-          <p className="text-3xl font-bold">{pct}%</p>
+          <span className="rounded-full bg-violet-50 px-3 py-1 text-xs font-bold text-violet-700">
+            {earnedBadges} / {badges.length} earned
+          </span>
         </div>
-        <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-white/25">
-          <div
-            className="h-full rounded-full bg-white transition-all"
-            style={{ width: `${pct}%` }}
-          />
+
+        <div className="flex flex-wrap justify-center gap-7">
+          {badges.map((badge) => (
+            <Badge
+              key={badge.id}
+              icon={badge.icon}
+              label={badge.label}
+              color={badge.color}
+              earned={badge.isEarned(completedCount, totalCount)}
+            />
+          ))}
         </div>
-      </div>
+      </section>
 
-      
-      <div className="mt-6">
-        <ProgressSummaryCard />
-      </div>
-
-      <div className="mt-6 flex flex-wrap justify-center gap-6">
-        {badges.map((badge) => (
-          <Badge
-            key={badge.id}
-            icon={badge.icon}
-            label={badge.label}
-            color={badge.color}
-            earned={badge.isEarned(completedCount, totalCount)}
-          />
-        ))}
-      </div>
-      <div className="mt-6">
-        <NextStepBanner />
-      </div>
+      {/* ── National ranking ── */}
       <NationalRanking />
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {navigation.map((group) => {
-          const Icon = group.icon;
-          return (
-            <div
-              key={group.slug}
-              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
-            >
-              <div className="mb-3 flex items-center gap-2 font-semibold text-slate-800">
-                <Icon size={18} className="text-indigo-600" />
-                {group.label}
-              </div>
-              <ul className="space-y-1">
-                {group.items.map((item) => {
-                  const path = activityPath(group.slug, item.slug);
-                  return (
-                    <li key={item.slug}>
-                      <Link
-                        to={path}
-                        className="flex items-center justify-between rounded-lg px-2 py-1.5 text-sm text-slate-600 transition hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        {item.label}
-                        {isComplete(path) && (
-                          <span className="text-xs font-medium text-emerald-500">
-                            Done
-                          </span>
-                        )}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }

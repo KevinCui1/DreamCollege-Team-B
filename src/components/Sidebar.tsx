@@ -17,21 +17,24 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
 
   return (
     <aside
-      className={`flex h-full flex-col border-r border-slate-200 bg-white transition-all duration-200 ${
+      className={`flex h-full flex-col border-r border-white/50 bg-white/60 backdrop-blur-xl transition-all duration-200 ${
         collapsed ? "w-16" : "w-72"
       }`}
     >
-      <div className="flex items-center gap-3 border-b border-slate-200 px-4 py-4">
+      <div className="flex items-center gap-3 border-b border-slate-900/[0.06] px-4 py-4">
         <button
           type="button"
           onClick={onToggle}
           aria-label="Toggle sidebar"
-          className="rounded-lg p-1 text-slate-600 transition hover:bg-slate-100"
+          className="rounded-lg p-1 text-slate-500 transition hover:bg-slate-900/[0.04] hover:text-slate-700"
         >
           <Menu size={22} />
         </button>
         {!collapsed && (
-          <Link to="/" className="text-lg font-bold text-slate-800">
+          <Link
+            to="/"
+            className="font-display text-lg font-bold tracking-tight text-slate-900"
+          >
             Student Dashboard
           </Link>
         )}
@@ -44,10 +47,10 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
               to="/achievements"
               end
               className={({ isActive }) =>
-                `mb-3 flex items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition ${
+                `mb-3 flex items-center gap-3 rounded-lg px-4 py-3 text-[15px] font-semibold transition ${
                   isActive
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-sm"
-                    : "border border-slate-200 text-slate-700 hover:bg-slate-50"
+                    ? "bg-violet-600 text-white shadow-card"
+                    : "border border-slate-900/[0.06] bg-white/40 text-slate-700 hover:bg-white/70"
                 }`
               }
             >
@@ -56,7 +59,7 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
                   <Map
                     size={20}
                     strokeWidth={2}
-                    className={isActive ? "text-white" : "text-indigo-600"}
+                    className={isActive ? "text-white" : "text-slate-500"}
                   />
                   <span className="flex-1">Achievement Map</span>
                   <span
@@ -75,16 +78,16 @@ export default function Sidebar({ collapsed, onToggle }: Props) {
             ))}
           </nav>
 
-          <div className="border-t border-slate-200 px-4 py-4">
-            <div className="mb-1.5 flex justify-between text-xs font-medium text-slate-500">
+          <div className="border-t border-slate-900/[0.06] px-4 py-4">
+            <div className="mb-1.5 flex justify-between text-xs font-semibold text-slate-500">
               <span>Progress</span>
-              <span>
+              <span className="text-violet-700">
                 {completedCount} of {totalCount} complete
               </span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-900/[0.06]">
               <div
-                className="h-full rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 transition-all"
+                className="h-full rounded-full bg-violet-600 transition-all"
                 style={{ width: `${pct}%` }}
               />
             </div>

@@ -27,7 +27,7 @@ const DEMO_METRICS: Metric[] = [
     label: "Class Rank",
     value: "18 / 340",
     percentile: 95,
-    insight: "Top 5% of your graduating class — highly competitive.",
+    insight: "Top 5% of your graduating class. Highly competitive.",
     icon: Award,
   },
   {
@@ -50,7 +50,7 @@ const OVERALL_PERCENTILE = 89;
 
 function percentileColor(p: number): string {
   if (p >= 90) return "bg-emerald-500";
-  if (p >= 75) return "bg-indigo-500";
+  if (p >= 75) return "bg-violet-500";
   if (p >= 50) return "bg-amber-400";
   return "bg-rose-400";
 }
@@ -68,10 +68,10 @@ function MetricCard({ metric }: { metric: Metric }) {
   const badge = percentileLabel(metric.percentile);
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+    <div className="rounded-lg border border-slate-900/[0.06] bg-white/60 p-4 shadow-card backdrop-blur-md transition duration-300 hover:-translate-y-0.5 hover:shadow-card-lg">
       <div className="mb-2 flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-          <Icon size={15} className="text-indigo-500" />
+          <Icon size={15} className="text-violet-500" />
           {metric.label}
         </div>
         <span
@@ -87,7 +87,7 @@ function MetricCard({ metric }: { metric: Metric }) {
         <span>National percentile</span>
         <span className="font-semibold text-slate-700">{metric.percentile}th</span>
       </div>
-      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2 w-full overflow-hidden rounded-full bg-violet-100">
         <div
           className={`h-full rounded-full transition-all ${barColor}`}
           style={{ width: `${metric.percentile}%` }}
@@ -101,16 +101,16 @@ function MetricCard({ metric }: { metric: Metric }) {
 
 export default function NationalRanking() {
   return (
-    <div className="mt-8 rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl bg-white/75 shadow-card border border-slate-900/[0.06] backdrop-blur-xl">
       {/* Header */}
-      <div className="rounded-t-2xl bg-gradient-to-r from-slate-800 to-indigo-900 px-6 py-5 text-white">
+      <div className="bg-violet-700 px-6 py-5 text-white">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/15">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/15">
               <Globe size={20} />
             </div>
             <div>
-              <h2 className="text-lg font-bold">National Ranking</h2>
+              <h2 className="font-display text-lg font-bold">National Ranking</h2>
               <p className="text-sm opacity-75">
                 Compared to DreamCollege.ai students across the country
               </p>
@@ -120,7 +120,7 @@ export default function NationalRanking() {
           <div className="flex items-center gap-4 sm:text-right">
             <div>
               <p className="text-sm opacity-75">Overall percentile</p>
-              <p className="text-4xl font-extrabold leading-none">
+              <p className="font-display text-4xl font-bold leading-none">
                 {OVERALL_PERCENTILE}
                 <span className="text-xl font-semibold opacity-80">th</span>
               </p>
@@ -164,19 +164,19 @@ export default function NationalRanking() {
         ))}
 
         {/* Context card */}
-        <div className="flex flex-col justify-between rounded-xl border border-indigo-100 bg-indigo-50 p-4">
+        <div className="flex flex-col justify-between rounded-lg border border-violet-100 bg-violet-50/70 p-4 backdrop-blur-md">
           <div>
-            <p className="mb-1 text-sm font-semibold text-indigo-800">
+            <p className="mb-1 text-sm font-semibold text-violet-800">
               What does this mean?
             </p>
-            <p className="text-xs text-indigo-700 leading-relaxed">
+            <p className="text-xs text-violet-700 leading-relaxed">
               Your percentile compares you to thousands of college-bound students
               on DreamCollege.ai. Scores are updated as you complete activities
               and add academic information.
             </p>
           </div>
-          <p className="mt-4 text-xs text-indigo-500 italic">
-            Demo data — connect your school profile to see live rankings.
+          <p className="mt-4 text-xs text-violet-500 italic">
+            Demo data. Connect your school profile to see live rankings.
           </p>
         </div>
       </div>

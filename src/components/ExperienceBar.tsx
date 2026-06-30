@@ -5,7 +5,6 @@ import {
   Compass,
   Navigation2,
   Rocket,
-  Sparkles,
   Trophy,
   Wrench,
 } from "lucide-react";
@@ -74,15 +73,17 @@ const TOTAL_XP = XP_ITEMS.length; // 34
 // ── Segmented bar phases ───────────────────────────────────────────────────
 // Each segment width is proportional to item count (flex: count).
 
+// Unified violet monochrome ramp: lightens-to-deepens across the journey,
+// so the bar reads as one cohesive progression rather than a rainbow.
 const PHASES = [
-  { name: "Profile",      count: 1, color: "#818cf8" }, // indigo-400
-  { name: "Career",       count: 5, color: "#a78bfa" }, // violet-400
-  { name: "9th",          count: 5, color: "#c084fc" }, // purple-400
-  { name: "10th",         count: 5, color: "#e879f9" }, // fuchsia-400
-  { name: "11th",         count: 5, color: "#f472b6" }, // pink-400
-  { name: "College Plan", count: 6, color: "#fb7185" }, // rose-400
-  { name: "Apps",         count: 2, color: "#fb923c" }, // orange-400
-  { name: "12th",         count: 5, color: "#fbbf24" }, // amber-400
+  { name: "Profile",      count: 1, color: "#c4b5fd" }, // violet-300
+  { name: "Career",       count: 5, color: "#b3a4fb" },
+  { name: "9th",          count: 5, color: "#a78bfa" }, // violet-400
+  { name: "10th",         count: 5, color: "#9471f4" },
+  { name: "11th",         count: 5, color: "#8b5cf6" }, // violet-500
+  { name: "College Plan", count: 6, color: "#7c4ddb" },
+  { name: "Apps",         count: 2, color: "#7c3aed" }, // violet-600
+  { name: "12th",         count: 5, color: "#6d28d9" }, // violet-700
 ];
 
 // ── Rank icon map ──────────────────────────────────────────────────────────
@@ -145,40 +146,36 @@ export default function ExperienceBar() {
     RANK_ICONS[currentRank.id as keyof typeof RANK_ICONS] ?? Compass;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-900 via-indigo-950 to-purple-950 p-6 text-white shadow-2xl ring-1 ring-white/10">
-        {/* Ambient glow orbs */}
-        <div className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-indigo-600/25 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-16 -left-16 h-48 w-48 rounded-full bg-purple-600/25 blur-3xl" />
-
+    <div className="relative overflow-hidden rounded-xl bg-white/75 p-7 text-slate-900 shadow-card border border-slate-900/[0.06] backdrop-blur-xl">
         {/* ── Header: rank badge + XP counter ── */}
         <div className="relative flex items-start justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500/30 to-purple-500/30 ring-1 ring-white/20">
-              <RankIcon size={22} className="text-indigo-300" />
+            <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-violet-600 shadow-card">
+              <RankIcon size={22} className="text-white" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                 Current Rank
               </p>
-              <p className="mt-0.5 text-xl font-bold leading-none">
+              <p className="mt-0.5 font-display text-xl font-bold leading-none tracking-tight">
                 {currentRank.name}
               </p>
-              <p className="mt-1.5 text-xs leading-none text-white/45">
+              <p className="mt-1.5 text-xs leading-none text-slate-500">
                 {currentRank.tagline}
               </p>
             </div>
           </div>
 
           <div className="flex-shrink-0 text-right">
-            <p className="text-4xl font-bold tabular-nums leading-none">
+            <p className="font-display text-4xl font-bold tabular-nums leading-none tracking-tight text-slate-900">
               {earnedXP}
-              <span className="text-xl font-normal text-white/35">
+              <span className="text-xl font-medium text-slate-400">
                 {" "}
                 / {TOTAL_XP}
               </span>
             </p>
-            <p className="mt-1.5 text-xs text-white/35">
-              {isFull ? "All complete!" : `${xpPct}% complete`}
+            <p className="mt-1.5 text-xs font-medium text-slate-400">
+              {isFull ? "All complete" : `${xpPct}% complete`}
             </p>
           </div>
         </div>
@@ -194,7 +191,7 @@ export default function ExperienceBar() {
                 style={{ flex: phase.count }}
               >
                 {/* Empty track */}
-                <div className="absolute inset-0 bg-white/[0.07]" />
+                <div className="absolute inset-0 bg-violet-100" />
                 {/* Filled portion */}
                 {phase.fillPct > 0 && (
                   <div
@@ -202,7 +199,7 @@ export default function ExperienceBar() {
                     style={{
                       width: `${phase.fillPct}%`,
                       backgroundColor: phase.full ? "#34d399" : phase.color,
-                      boxShadow: `0 0 14px ${phase.color}66`,
+                      boxShadow: `0 0 6px ${phase.color}33`,
                     }}
                   >
                     {/* Shimmer sweep */}
@@ -225,17 +222,17 @@ export default function ExperienceBar() {
                   }}
                 />
                 <span
-                  className={`text-[10px] font-medium transition-colors ${
+                  className={`text-[10px] font-semibold transition-colors ${
                     phase.full
-                      ? "text-emerald-400"
+                      ? "text-emerald-600"
                       : phase.done > 0
-                      ? "text-white/65"
-                      : "text-white/25"
+                      ? "text-slate-600"
+                      : "text-slate-400"
                   }`}
                 >
                   {phase.name}
                   {phase.done > 0 && (
-                    <span className="ml-0.5 text-white/30">
+                    <span className="ml-0.5 text-slate-400">
                       {" "}
                       {phase.done}/{phase.count}
                     </span>
@@ -258,25 +255,19 @@ export default function ExperienceBar() {
                 <div
                   className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold transition-all duration-300 ${
                     current
-                      ? "bg-white/[0.18] text-white ring-1 ring-white/25"
+                      ? "bg-violet-600 text-white shadow-card"
                       : earned
-                      ? "bg-white/[0.09] text-white/60"
-                      : "text-white/20"
+                      ? "bg-violet-100 text-violet-700"
+                      : "text-slate-300"
                   }`}
                 >
                   <Icon size={11} />
                   {rank.name}
-                  {current && (
-                    <Sparkles
-                      size={9}
-                      className="animate-pulse text-yellow-300"
-                    />
-                  )}
                 </div>
                 {i < ranks.length - 1 && (
                   <div
                     className={`h-px flex-1 rounded-full transition-colors duration-500 ${
-                      earned ? "bg-white/30" : "bg-white/10"
+                      earned ? "bg-violet-300" : "bg-slate-900/[0.06]"
                     }`}
                   />
                 )}
@@ -288,29 +279,29 @@ export default function ExperienceBar() {
         {/* ── Next step / completion ── */}
         <div className="relative mt-4">
           {isFull ? (
-            <div className="flex items-center gap-3 rounded-xl bg-emerald-500/15 p-4 ring-1 ring-emerald-400/30">
-              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-400/20 ring-1 ring-emerald-400/40">
-                <Trophy size={18} className="text-emerald-300" />
+            <div className="flex items-center gap-3 rounded-lg bg-emerald-50 p-4 ring-1 ring-emerald-200">
+              <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-emerald-100 ring-1 ring-emerald-300">
+                <Trophy size={18} className="text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm font-bold text-emerald-300">
-                  Journey Complete!
+                <p className="text-sm font-bold text-emerald-700">
+                  Journey complete
                 </p>
-                <p className="mt-0.5 text-xs text-white/45">
-                  You've accomplished every milestone. Incredible work!
+                <p className="mt-0.5 text-xs text-slate-500">
+                  You've reached every milestone in your plan.
                 </p>
               </div>
             </div>
           ) : nextStep ? (
-            <div className="flex items-center justify-between gap-3 rounded-xl bg-white/[0.07] p-4 ring-1 ring-white/[0.08]">
+            <div className="flex items-center justify-between gap-3 rounded-lg bg-violet-50/80 p-4 ring-1 ring-violet-100">
               <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-indigo-300">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
                   Recommended Next Step
                 </p>
-                <p className="mt-1 truncate text-sm font-semibold">
+                <p className="mt-1 truncate text-sm font-bold text-slate-800">
                   {nextStep.label}
                 </p>
-                <p className="mt-0.5 text-xs text-white/40">
+                <p className="mt-0.5 text-xs text-slate-500">
                   {nextStep.group}
                 </p>
               </div>
@@ -320,7 +311,7 @@ export default function ExperienceBar() {
                     ? nextStep.path
                     : "/achievements"
                 }
-                className="flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-gradient-to-r from-indigo-500 to-purple-500 px-3.5 py-2.5 text-xs font-bold shadow-lg transition hover:from-indigo-400 hover:to-purple-400 active:scale-95"
+                className="flex flex-shrink-0 items-center gap-1.5 rounded-lg bg-violet-600 px-3.5 py-2.5 text-xs font-bold text-white shadow-card transition hover:bg-violet-700 active:scale-95"
               >
                 Go <ArrowRight size={12} />
               </Link>

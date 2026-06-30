@@ -48,19 +48,19 @@ export default function Badge({ icon: Icon, label, color, earned = true }: Props
   const style = COLOR_STYLES[color];
 
   return (
-    <div className="flex w-28 flex-col items-center gap-2 text-center">
+    <div className="flex w-28 flex-col items-center gap-2.5 text-center">
       <div
-        className={`flex h-20 w-20 items-center justify-center rounded-full ring-4 transition ${
+        className={`flex h-20 w-20 items-center justify-center rounded-full ring-4 transition duration-300 ${
           earned
             ? `scale-105 bg-gradient-to-br ${style.gradient} text-white shadow-xl ${style.shadow} ${style.ring}`
-            : "bg-slate-100 text-slate-300 ring-slate-200"
+            : "bg-violet-50 text-violet-200 ring-violet-100"
         }`}
       >
         <Icon size={30} strokeWidth={earned ? 2.5 : 2} />
       </div>
       <span
         className={`text-sm font-bold leading-tight ${
-          earned ? style.text : "text-slate-400"
+          earned ? style.text : "text-violet-300"
         }`}
       >
         {label}
