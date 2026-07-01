@@ -8,39 +8,41 @@ type Props = {
   earned?: boolean;
 };
 
+// Milestones deepen along a single lavender ramp so the row reads as one warm
+// progression rather than a rainbow — with a soft gold reward for "All Done".
 const COLOR_STYLES: Record<
   BadgeColor,
   { gradient: string; ring: string; shadow: string; text: string }
 > = {
   emerald: {
-    gradient: "from-emerald-300 via-emerald-400 to-teal-500",
-    ring: "ring-emerald-200",
-    shadow: "shadow-emerald-400/60",
-    text: "text-emerald-700",
+    gradient: "from-lavender-300 to-lavender-400",
+    ring: "ring-lavender-100",
+    shadow: "shadow-lavender-400/50",
+    text: "text-lavender-600",
   },
   sky: {
-    gradient: "from-sky-300 via-sky-400 to-blue-500",
-    ring: "ring-sky-200",
-    shadow: "shadow-sky-400/60",
-    text: "text-sky-700",
+    gradient: "from-lavender-400 to-lavender-500",
+    ring: "ring-lavender-200",
+    shadow: "shadow-lavender-500/50",
+    text: "text-lavender-700",
   },
   violet: {
-    gradient: "from-violet-300 via-violet-400 to-purple-600",
-    ring: "ring-violet-200",
-    shadow: "shadow-violet-400/60",
-    text: "text-violet-700",
+    gradient: "from-lavender-500 to-lavender-700",
+    ring: "ring-lavender-200",
+    shadow: "shadow-lavender-600/50",
+    text: "text-lavender-700",
   },
   rose: {
-    gradient: "from-rose-300 via-rose-400 to-pink-500",
-    ring: "ring-rose-200",
-    shadow: "shadow-rose-400/60",
-    text: "text-rose-700",
+    gradient: "from-lavender-600 to-lavender-800",
+    ring: "ring-lavender-300",
+    shadow: "shadow-lavender-700/50",
+    text: "text-lavender-800",
   },
   amber: {
-    gradient: "from-amber-300 via-amber-400 to-orange-500",
+    gradient: "from-amber-300 to-amber-500",
     ring: "ring-amber-200",
     shadow: "shadow-amber-400/60",
-    text: "text-amber-700",
+    text: "text-amber-600",
   },
 };
 
@@ -53,14 +55,14 @@ export default function Badge({ icon: Icon, label, color, earned = true }: Props
         className={`flex h-20 w-20 items-center justify-center rounded-full ring-4 transition duration-300 ${
           earned
             ? `scale-105 bg-gradient-to-br ${style.gradient} text-white shadow-xl ${style.shadow} ${style.ring}`
-            : "bg-violet-50 text-violet-200 ring-violet-100"
+            : "bg-lavender-50 text-lavender-200 ring-lavender-100"
         }`}
       >
         <Icon size={30} strokeWidth={earned ? 2.5 : 2} />
       </div>
       <span
         className={`text-sm font-bold leading-tight ${
-          earned ? style.text : "text-violet-300"
+          earned ? style.text : "text-ink-soft/70"
         }`}
       >
         {label}

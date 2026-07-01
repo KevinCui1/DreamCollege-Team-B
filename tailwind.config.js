@@ -14,14 +14,38 @@ export default {
           "sans-serif",
         ],
         display: [
-          '"Space Grotesk"',
+          "Quicksand",
           "Inter",
           "ui-sans-serif",
           "system-ui",
           "sans-serif",
         ],
       },
+      colors: {
+        // Lavender-centered scale: brighter → white, darker → vivid purple.
+        lavender: {
+          50: "#FAF7FF",
+          100: "#F3EEFF",
+          200: "#EDE6FF",
+          300: "#D9CBFF",
+          400: "#C9B8FF",
+          500: "#A78BFA",
+          600: "#8B5CF6",
+          700: "#7C3AED",
+          800: "#6D28D9",
+          900: "#5B21B6",
+        },
+        // Warm plum inks — replace cold slate for headings/body.
+        ink: {
+          DEFAULT: "#2E1065",
+          muted: "#6B5E92",
+          soft: "#9488B4",
+        },
+      },
       boxShadow: {
+        // Warm lavender-tinted soft-UI shadows.
+        soft: "0 1px 2px rgba(76, 29, 149, 0.05), 0 6px 20px rgba(124, 58, 237, 0.08)",
+        "soft-lg": "0 2px 6px rgba(76, 29, 149, 0.06), 0 16px 40px rgba(124, 58, 237, 0.14)",
         card: "0 1px 2px rgba(16, 24, 40, 0.04), 0 4px 16px rgba(16, 24, 40, 0.06)",
         "card-lg": "0 2px 4px rgba(16, 24, 40, 0.05), 0 12px 32px rgba(16, 24, 40, 0.10)",
         // Aliases kept so existing shadow-glass references stay valid.

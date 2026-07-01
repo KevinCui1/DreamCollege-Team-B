@@ -173,3 +173,28 @@ body {
 .xp-shimmer {
   animation: xp-shimmer 2.8s ease-in-out infinite;
 }
+
+/* ── "You are here" node pulse on the journey timeline ───────────────────────
+   A soft lavender ring breathes outward from the current milestone node so the
+   eye lands on it first. Purely a wayfinding cue — stilled under reduced-motion. */
+@keyframes journey-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.45); }
+  70%  { box-shadow: 0 0 0 10px rgba(139, 92, 246, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+.journey-here {
+  animation: journey-pulse 2.4s ease-out infinite;
+}
+
+/* ── Respect reduced-motion for ambient / decorative loops ────────────────────
+   Functional feedback (hover lifts, the rank-up sequence's own reduced-motion
+   handling) is untouched; only the continuous background loops are stilled. */
+@media (prefers-reduced-motion: reduce) {
+  .xp-shimmer,
+  .animate-aurora-drift,
+  .rankup-orbit,
+  .rankup-halo,
+  .journey-here {
+    animation: none !important;
+  }
+}

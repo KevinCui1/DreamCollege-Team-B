@@ -20,15 +20,15 @@ export default function NavGroup({ group, defaultOpen = true }: Props) {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between rounded-lg border border-slate-900/[0.06] bg-white/50 px-4 py-2.5 text-left text-slate-700 transition hover:bg-white/70"
+        className="flex w-full items-center justify-between rounded-xl bg-lavender-50 px-4 py-2.5 text-left text-ink transition hover:bg-lavender-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lavender-400"
       >
         <span className="flex items-center gap-3 font-display font-semibold">
-          <Icon size={18} strokeWidth={2} className="text-slate-500" />
+          <Icon size={18} strokeWidth={2} className="text-lavender-500" />
           {group.label}
         </span>
         <ChevronDown
           size={18}
-          className={`transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-lavender-400 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -42,17 +42,17 @@ export default function NavGroup({ group, defaultOpen = true }: Props) {
                 <NavLink
                   to={path}
                   className={({ isActive }) =>
-                    `flex items-center gap-2 rounded-md px-3 py-2 text-[15px] transition ${
+                    `flex items-center gap-2 rounded-lg px-3 py-2 text-[15px] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lavender-400 ${
                       isActive
-                        ? "bg-white/70 font-semibold text-violet-700"
-                        : "text-slate-600 hover:bg-white/60 hover:text-slate-900"
+                        ? "bg-lavender-100 font-semibold text-lavender-700"
+                        : "text-ink-muted hover:bg-lavender-50 hover:text-ink"
                     }`
                   }
                 >
                   {done ? (
                     <CheckCircle2 size={16} className="text-emerald-500" />
                   ) : (
-                    <Circle size={16} className="text-slate-300" />
+                    <Circle size={16} className="text-lavender-300" />
                   )}
                   {item.label}
                 </NavLink>

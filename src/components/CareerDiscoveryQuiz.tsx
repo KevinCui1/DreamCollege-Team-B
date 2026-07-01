@@ -47,7 +47,7 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
   };
 
   // Progress calculations fixed
-  const progressPercent = Math.round(((step + 1) / totalQuizQuestions) * 100);
+  const progressPercent = Math.round((step / totalQuizQuestions) * 100);
 
   // Summary View
   if (!taking) {
