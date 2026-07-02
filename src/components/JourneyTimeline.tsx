@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle,
@@ -7,18 +7,26 @@ import {
   Briefcase,
   Building2,
   Check,
+  ChevronDown,
   DollarSign,
   FileText,
+  HelpCircle,
+  Lightbulb,
   Loader2,
   PartyPopper,
   RefreshCw,
   Sparkles,
+  Target,
   User,
+  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { useCompletion } from "../context/CompletionContext";
 import { useAchievement } from "../context/AchievementContext";
-import { useStudentProfile } from "../context/StudentProfileContext";
+import {
+  useStudentProfile,
+  type StudentProfile,
+} from "../context/StudentProfileContext";
 import { makeItemDone } from "../lib/nextStep";
 import {
   JOURNEY_COUNT,
@@ -38,10 +46,49 @@ import {
 } from "../lib/roadmap";
 import { softCard, eyebrow } from "../theme";
 
+// ── Optional profile fields shown in the collapsible "Tell us more" panel ───
+
+type ProfileField = {
+  key:
+    | "gradeLevel"
+    | "gpa"
+    | "apCount"
+    | "interests"
+    | "goals"
+    | "constraints";
+  label: string;
+  placeholder: string;
+  multiline?: boolean;
+};
+
+const PROFILE_FIELDS: ProfileField[] = [
+  { key: "gradeLevel", label: "Grade level", placeholder: "e.g. 11th grade" },
+  { key: "gpa", label: "GPA", placeholder: "e.g. 3.8 / 4.0" },
+  { key: "apCount", label: "APs taken / planned", placeholder: "e.g. 4" },
+  {
+    key: "interests",
+    label: "Interests & extracurriculars",
+    placeholder: "e.g. robotics club, volunteering, soccer",
+    multiline: true,
+  },
+  {
+    key: "goals",
+    label: "Goals",
+    placeholder: "e.g. study computer science, get into a state school",
+    multiline: true,
+  },
+  {
+    key: "constraints",
+    label: "Constraints",
+    placeholder: "e.g. need scholarships, prefer to stay in-state",
+    multiline: true,
+  },
+];
+
 export default function JourneyTimeline() {
-  const { isComplete } = useCompletion();
+  const { isComplete, completedPaths } = useCompletion();
   const { gradeAchievements } = useAchievement();
-  const { quizAnswers, profile } = useStudentProfile();
+  const { quizAnswers, profile, updateProfile } = useStudentProfile();
 
   const itemDone = useMemo(
     () => makeItemDone(isComplete, gradeAchievements),
@@ -61,12 +108,19 @@ export default function JourneyTimeline() {
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
+  const [showProfileForm, setShowProfileForm] = useState(false);
+  const [autoUpdating, setAutoUpdating] = useState(false);
 
-  const handleGenerate = async () => {
+  const handleGenerate = async (lastCompletedActivity?: string | null) => {
     setIsGenerating(true);
     setGenerateError(null);
     try {
-      const ctx = buildRoadmapContext({ quizAnswers, profile, isComplete });
+      const ctx = buildRoadmapContext({
+        quizAnswers,
+        profile,
+        isComplete,
+        lastCompletedActivity,
+      });
       const result = await requestRoadmap(ctx);
       saveRoadmap(result);
       setRoadmap(result);
@@ -76,8 +130,30 @@ export default function JourneyTimeline() {
       );
     } finally {
       setIsGenerating(false);
+      setAutoUpdating(false);
     }
   };
+
+  // Dynamic updates: when the student completes a new step and a roadmap
+  // already exists, silently regenerate so future entries reflect what they
+  // just finished. Skipped on first mount (ref seeds to the current count),
+  // and skipped entirely until the roadmap has been generated once.
+  const prevCompletedCountRef = useRef(completedPaths.length);
+  const prevCompletedPathsRef = useRef(completedPaths);
+  useEffect(() => {
+    const prevPaths = prevCompletedPathsRef.current;
+    const grew = completedPaths.length > prevCompletedCountRef.current;
+    if (grew && roadmap && !isGenerating) {
+      const newlyCompleted = completedPaths.find(
+        (p) => !prevPaths.includes(p),
+      );
+      setAutoUpdating(true);
+      void handleGenerate(newlyCompleted ?? null);
+    }
+    prevCompletedCountRef.current = completedPaths.length;
+    prevCompletedPathsRef.current = completedPaths;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [completedPaths]);
 
   // Phase 1: Prerequisites not complete — show focused starter card
   if (!setupDone) {
@@ -95,7 +171,11 @@ export default function JourneyTimeline() {
       <GenerateCard
         isGenerating={isGenerating}
         generateError={generateError}
-        onGenerate={handleGenerate}
+        onGenerate={() => handleGenerate(null)}
+        profile={profile}
+        updateProfile={updateProfile}
+        showProfileForm={showProfileForm}
+        onToggleProfileForm={() => setShowProfileForm((s) => !s)}
       />
     );
   }
@@ -118,6 +198,26 @@ export default function JourneyTimeline() {
           {completed.length} / {JOURNEY_COUNT} done
         </span>
       </div>
+
+      {autoUpdating && (
+        <div className="mb-5 flex items-center gap-2 rounded-xl border border-lavender-200 bg-lavender-50 px-3 py-2 text-xs font-semibold text-lavender-700">
+          <Loader2 size={13} className="animate-spin" />
+          Updating your plan based on what you just finished…
+        </div>
+      )}
+
+      {/* Recommended next step — the merged "Best Next Task" feature, now
+          the first thing shown on the dashboard instead of a corner button. */}
+      {roadmap.recommendation && (
+        <RecommendationCard recommendation={roadmap.recommendation} />
+      )}
+
+      <ProfileDetailsPanel
+        profile={profile}
+        updateProfile={updateProfile}
+        expanded={showProfileForm}
+        onToggle={() => setShowProfileForm((s) => !s)}
+      />
 
       {/* Completed and current static milestones */}
       <ol className="space-y-0">
@@ -195,7 +295,7 @@ export default function JourneyTimeline() {
           <span>{generateError}</span>
           <button
             type="button"
-            onClick={handleGenerate}
+            onClick={() => handleGenerate(null)}
             className="ml-auto font-semibold underline"
           >
             Retry
@@ -214,7 +314,7 @@ export default function JourneyTimeline() {
         </p>
         <button
           type="button"
-          onClick={handleGenerate}
+          onClick={() => handleGenerate(null)}
           disabled={isGenerating}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-lavender-600 transition hover:text-lavender-700 disabled:opacity-50"
         >
@@ -227,6 +327,129 @@ export default function JourneyTimeline() {
         </button>
       </div>
     </section>
+  );
+}
+
+// ── Recommended next step (merged Best Next Task result) ────────────────────
+
+function RecommendationCard({
+  recommendation,
+}: {
+  recommendation: NonNullable<GeneratedRoadmap["recommendation"]>;
+}) {
+  return (
+    <div className="mb-6 rounded-2xl border border-lavender-300/60 bg-gradient-to-br from-lavender-50 to-white p-5 shadow-soft">
+      <div className="flex items-center gap-2">
+        <Target size={16} className="text-lavender-600" />
+        <p className={eyebrow}>Your best next step</p>
+      </div>
+      <p className="mt-2 font-display text-lg font-bold leading-snug text-ink">
+        {recommendation.bestTask}
+      </p>
+
+      {recommendation.why && (
+        <div className="mt-3 flex items-start gap-2">
+          <Lightbulb size={15} className="mt-0.5 flex-shrink-0 text-amber-500" />
+          <p className="text-sm leading-relaxed text-ink-muted">
+            {recommendation.why}
+          </p>
+        </div>
+      )}
+
+      {recommendation.appTool && (
+        <div className="mt-2 flex items-start gap-2">
+          <Wrench size={15} className="mt-0.5 flex-shrink-0 text-emerald-600" />
+          <p className="text-sm leading-relaxed text-ink-muted">
+            {recommendation.appTool}
+          </p>
+        </div>
+      )}
+
+      {recommendation.missingInfo.length > 0 && (
+        <div className="mt-3 flex items-start gap-2">
+          <HelpCircle size={15} className="mt-0.5 flex-shrink-0 text-ink-soft" />
+          <ul className="list-disc space-y-0.5 pl-4 text-xs text-ink-soft">
+            {recommendation.missingInfo.map((m, i) => (
+              <li key={i}>{m}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Collapsible "tell us more about you" profile panel ─────────────────────
+
+function ProfileDetailsPanel({
+  profile,
+  updateProfile,
+  expanded,
+  onToggle,
+}: {
+  profile: StudentProfile;
+  updateProfile: (patch: Partial<StudentProfile>) => void;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="mb-6 rounded-2xl border border-lavender-100 bg-lavender-50/50 p-4">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex w-full items-center justify-between gap-2 text-left"
+      >
+        <span className="text-xs font-bold uppercase tracking-widest text-lavender-600">
+          Tell us more about you
+        </span>
+        <ChevronDown
+          size={16}
+          className={`text-lavender-400 transition-transform ${
+            expanded ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      <p className="mt-1 text-xs text-ink-soft">
+        Optional — sharpens your plan. Your quiz answers and progress are
+        already included automatically.
+      </p>
+
+      {expanded && (
+        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+          {PROFILE_FIELDS.map((field) => (
+            <div
+              key={field.key}
+              className={field.multiline ? "sm:col-span-2" : ""}
+            >
+              <label className="mb-1 block text-xs font-medium text-slate-600">
+                {field.label}
+              </label>
+              {field.multiline ? (
+                <textarea
+                  value={profile[field.key]}
+                  onChange={(e) =>
+                    updateProfile({ [field.key]: e.target.value })
+                  }
+                  placeholder={field.placeholder}
+                  rows={2}
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-lavender-400 focus:ring-2 focus:ring-lavender-100"
+                />
+              ) : (
+                <input
+                  type="text"
+                  value={profile[field.key]}
+                  onChange={(e) =>
+                    updateProfile({ [field.key]: e.target.value })
+                  }
+                  placeholder={field.placeholder}
+                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-lavender-400 focus:ring-2 focus:ring-lavender-100"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -323,10 +546,18 @@ function GenerateCard({
   isGenerating,
   generateError,
   onGenerate,
+  profile,
+  updateProfile,
+  showProfileForm,
+  onToggleProfileForm,
 }: {
   isGenerating: boolean;
   generateError: string | null;
   onGenerate: () => void;
+  profile: StudentProfile;
+  updateProfile: (patch: Partial<StudentProfile>) => void;
+  showProfileForm: boolean;
+  onToggleProfileForm: () => void;
 }) {
   return (
     <section className={`${softCard} p-8 text-center`}>
@@ -346,8 +577,18 @@ function GenerateCard({
           </h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-ink-muted">
             Based on your profile and career quiz, we'll build a personalized
-            action plan for your entire college journey.
+            action plan — including your best next step — for your entire
+            college journey.
           </p>
+
+          <div className="mx-auto mt-5 max-w-sm text-left">
+            <ProfileDetailsPanel
+              profile={profile}
+              updateProfile={updateProfile}
+              expanded={showProfileForm}
+              onToggle={onToggleProfileForm}
+            />
+          </div>
 
           {generateError && (
             <div className="mx-auto mt-4 flex max-w-sm items-start gap-3 rounded-2xl border border-rose-200/70 bg-rose-50 p-4 text-left">
