@@ -2,8 +2,10 @@
  * Dev/preview-server middleware that exposes `POST /api/generate-roadmap`.
  *
  * Generates a personalized, time-anchored roadmap for a student based on their
- * profile and Career Discovery Quiz results. The Anthropic API key is read here,
- * on the Node side, and is NEVER bundled into client code.
+ * profile and Career Discovery Quiz results, plus a single "best next step"
+ * recommendation (merged in from the old Best Next Task feature). The
+ * Anthropic API key is read here, on the Node side, and is NEVER bundled
+ * into client code.
  */
 export function generateRoadmapApi(apiKey) {
     const ROUTE = "/api/generate-roadmap";
@@ -44,9 +46,12 @@ export function generateRoadmapApi(apiKey) {
 }
 const SYSTEM_PROMPT = `You are a college and career planning advisor creating a personalized future roadmap for a high school student.
 
-Using the student's profile, career quiz results, and completed activities, generate a focused roadmap of 5–8 concrete, time-anchored milestones.
+Using the student's profile, career quiz results, completed activities, and (if present) the activity they most recently completed, generate:
 
-Rules:
+1. A focused roadmap of 5–8 concrete, time-anchored milestones ("entries").
+2. A single "recommendation": the one best next action for the student to take right now, given everything they've done so far.
+
+Rules for entries:
 - Every entry must be specific and actionable, not generic. "Do well in school" is useless. "Enroll in AP Chemistry to strengthen your pre-med path" is useful.
 - Use the student's current grade level as the time anchor. Spread entries from near-term through senior spring.
 - Focus on real-world actions outside the app: campus visits, test prep timelines, internship or shadowing searches, extracurricular leadership, scholarship applications, etc.
@@ -55,7 +60,14 @@ Rules:
 - Keep entry titles short (under 8 words) and descriptions to 1–2 sentences.
 - Category must be exactly one of: career, academic, college, application, financial, personal.
 
-Respond with a JSON object with an "entries" array.`;
+Rules for the recommendation:
+- If "lastCompletedActivity" is present, treat it as the freshest signal — the recommendation should account for what just changed, not just repeat a generic next step.
+- "bestTask" is one specific, immediately actionable task (not a whole phase).
+- "why" briefly explains why this is the right task right now, given their profile and progress.
+- "appTool" names the specific in-app tool or activity (from "incompleteActivities" if relevant) that helps them do it, or empty string if none applies.
+- "missingInfo" lists 0–3 short pieces of info that would sharpen the recommendation further (e.g. "Which colleges are you most interested in?"). Empty array if nothing is missing.
+
+Respond with a JSON object containing "entries" and "recommendation".`;
 const ENTRY_SCHEMA = {
     type: "object",
     properties: {
@@ -77,18 +89,43 @@ const ENTRY_SCHEMA = {
     required: ["id", "title", "description", "timeframe", "category"],
     additionalProperties: false,
 };
+const RECOMMENDATION_SCHEMA = {
+    type: "object",
+    properties: {
+        bestTask: {
+            type: "string",
+            description: "One specific, immediately actionable next task.",
+        },
+        why: {
+            type: "string",
+            description: "1–2 sentences on why this is the right task right now.",
+        },
+        appTool: {
+            type: "string",
+            description: "Specific in-app tool/activity that helps, or empty string.",
+        },
+        missingInfo: {
+            type: "array",
+            items: { type: "string" },
+            description: "0-3 short questions that would sharpen the recommendation.",
+        },
+    },
+    required: ["bestTask", "why", "appTool", "missingInfo"],
+    additionalProperties: false,
+};
 const RESPONSE_SCHEMA = {
     type: "object",
     properties: {
         entries: { type: "array", items: ENTRY_SCHEMA },
+        recommendation: RECOMMENDATION_SCHEMA,
     },
-    required: ["entries"],
+    required: ["entries", "recommendation"],
     additionalProperties: false,
 };
 async function generateRoadmap(apiKey, context) {
     const { default: Anthropic } = await import("@anthropic-ai/sdk");
     const client = new Anthropic({ apiKey });
-    const userContent = `Here is the student's context:\n\n${JSON.stringify(context, null, 2)}\n\nGenerate their personalized future roadmap.`;
+    const userContent = `Here is the student's context:\n\n${JSON.stringify(context, null, 2)}\n\nGenerate their personalized future roadmap and their single best next step.`;
     const params = {
         model: "claude-opus-4-8",
         max_tokens: 2048,
@@ -135,7 +172,20 @@ function parseRoadmap(text) {
             : "personal",
     }))
         .filter((e) => e.title);
-    return { entries };
+    const rawRecommendation = parsed.recommendation && typeof parsed.recommendation === "object"
+        ? parsed.recommendation
+        : null;
+    const recommendation = rawRecommendation && typeof rawRecommendation.bestTask === "string" && rawRecommendation.bestTask
+        ? {
+            bestTask: rawRecommendation.bestTask,
+            why: typeof rawRecommendation.why === "string" ? rawRecommendation.why : "",
+            appTool: typeof rawRecommendation.appTool === "string" ? rawRecommendation.appTool : "",
+            missingInfo: Array.isArray(rawRecommendation.missingInfo)
+                ? rawRecommendation.missingInfo.filter((m) => typeof m === "string")
+                : [],
+        }
+        : undefined;
+    return { entries, recommendation };
 }
 function readBody(req) {
     return new Promise((resolve, reject) => {
