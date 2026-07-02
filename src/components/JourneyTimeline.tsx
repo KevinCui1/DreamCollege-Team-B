@@ -45,6 +45,8 @@ import {
   type RoadmapEntryCategory,
 } from "../lib/roadmap";
 import { softCard, eyebrow } from "../theme";
+import { useFeedback } from "../context/FeedbackContext";
+import { roadmapFeedback } from "../data/feedbackQuestions";
 
 // ── Optional profile fields shown in the collapsible "Tell us more" panel ───
 
@@ -89,6 +91,7 @@ export default function JourneyTimeline() {
   const { isComplete, completedPaths } = useCompletion();
   const { gradeAchievements } = useAchievement();
   const { quizAnswers, profile, updateProfile } = useStudentProfile();
+  const { triggerFeedback } = useFeedback();
 
   const itemDone = useMemo(
     () => makeItemDone(isComplete, gradeAchievements),
@@ -124,6 +127,7 @@ export default function JourneyTimeline() {
       const result = await requestRoadmap(ctx);
       saveRoadmap(result);
       setRoadmap(result);
+      triggerFeedback(roadmapFeedback, 2000);
     } catch (e) {
       setGenerateError(
         e instanceof Error ? e.message : "Something went wrong.",

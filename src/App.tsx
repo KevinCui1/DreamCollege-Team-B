@@ -5,6 +5,7 @@ import RankUpOverlay from "./components/RankUpOverlay";
 import ResetButton from "./components/ResetButton";
 import AchievementSync from "./components/AchievementSync";
 import CelebrationToast from "./components/CelebrationToast";
+import FeedbackWidget from "./components/FeedbackWidget";
 import DashboardHome from "./pages/DashboardHome";
 import ActivityPage from "./pages/ActivityPage";
 import AchievementMap from "./pages/AchievementMap";
@@ -37,6 +38,8 @@ export default function App() {
       <RankUpOverlay />
       {/* Achievement toast — sits above the reset button. */}
       <CelebrationToast />
+      {/* Contextual feedback prompts — appear after key feature interactions. */}
+      <FeedbackWidget />
       {/* Always-visible control to wipe all saved progress. */}
       <ResetButton />
     </div>

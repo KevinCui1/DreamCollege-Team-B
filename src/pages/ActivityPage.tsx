@@ -7,6 +7,8 @@ import Confetti from "../components/Confetti";
 import CareerDiscoveryQuiz from "../components/CareerDiscoveryQuiz";
 import { milestones } from "../data/achievements";
 import { useAchievement } from "../context/AchievementContext";
+import { useFeedback } from "../context/FeedbackContext";
+import { activityFeedback } from "../data/feedbackQuestions";
 
 /** Slug of the activity that renders the interactive Career Discovery Quiz. */
 const CAREER_DISCOVERY_QUIZ_SLUG = "career-discovery-quiz";
@@ -18,6 +20,7 @@ export default function ActivityPage() {
   const { isComplete, complete } = useCompletion();
   const [showConfetti, setShowConfetti] = useState(false);
   const { earnMilestone } = useAchievement();
+  const { triggerFeedback } = useFeedback();
 
   const match = findActivity(groupSlug, itemSlug);
 
@@ -43,6 +46,10 @@ export default function ActivityPage() {
 
     const milestone = milestones.find((m) => m.triggerPath === path);
     if (milestone) earnMilestone(milestone.id);
+
+    if (itemSlug !== CAREER_DISCOVERY_QUIZ_SLUG) {
+      triggerFeedback(activityFeedback(path, item.label), 3000);
+    }
   };
 
   return (
