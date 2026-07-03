@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Globe, TrendingUp, BookOpen, Award, Target, BarChart2 } from "lucide-react";
+import { Globe, TrendingUp, BookOpen, Award, Target, Star, Heart, CheckCircle } from "lucide-react";
 import { softCard } from "../theme";
 
 type Metric = {
   label: string;
   value: string;
   percentile: number;
+  description: string;
   icon: React.ElementType;
   /** How heavily colleges weigh this factor. 1 = most important. */
   importance: number;
@@ -17,11 +18,76 @@ type Metric = {
 };
 
 const DEMO_METRICS: Metric[] = [
-  { label: "Unweighted GPA", value: "3.82 / 4.0", percentile: 88, icon: BookOpen, importance: 1, effort: 5 },
-  { label: "Weighted GPA",   value: "4.45 / 5.0", percentile: 83, icon: TrendingUp, importance: 2, effort: 5 },
-  { label: "Class Rank",     value: "18 / 340",   percentile: 95, icon: Award,      importance: 3, effort: 6 },
-  { label: "SAT / ACT",      value: "1430 · 32",  percentile: 91, icon: Target,     importance: 4, effort: 3 },
-  { label: "AP Scores",      value: "Avg 4.2 / 5", percentile: 86, icon: BarChart2, importance: 5, effort: 4 },
+  {
+    label: "Course Rigor",
+    value: "7 AP / IB / honors courses",
+    percentile: 84,
+    description:
+      "How many challenging courses (AP, IB, honors, dual-enrollment) you've taken. Colleges care more about this than your GPA — a B in AP Chemistry beats an A in a basic class every time.",
+    icon: BookOpen,
+    importance: 1,
+    effort: 5,
+  },
+  {
+    label: "Class Rank",
+    value: "18 / 340",
+    percentile: 95,
+    description:
+      "Your standing among every student in your graduating class. Ranking 18th out of 340 puts you in the top 5% of your school, which tells colleges how strong your GPA really is compared to your peers.",
+    icon: Award,
+    importance: 2,
+    effort: 6,
+  },
+  {
+    label: "SAT / ACT",
+    value: "1430 SAT · 32 ACT",
+    percentile: 91,
+    description:
+      "The one score every student takes on equal footing. A 1430 SAT or 32 ACT is above the average for most top-50 universities, and it's one of the fastest areas to improve with focused prep.",
+    icon: Target,
+    importance: 3,
+    effort: 3,
+  },
+  {
+    label: "Application Readiness",
+    value: "68% of milestones complete",
+    percentile: 72,
+    description:
+      "How much of your college-planning checklist you've finished — college list, personal statement, recommendations, and more. Most students your age have done far less. Completing the remaining steps bumps this score fast.",
+    icon: CheckCircle,
+    importance: 4,
+    effort: 1,
+  },
+  {
+    label: "Leadership Roles",
+    value: "2 positions held",
+    percentile: 88,
+    description:
+      "Formal positions where you were in charge — team captain, club president, founder, editor. Colleges want to see that you led something, not just showed up. Two roles puts you ahead of most applicants.",
+    icon: Star,
+    importance: 5,
+    effort: 4,
+  },
+  {
+    label: "Community Service",
+    value: "120 hours",
+    percentile: 62,
+    description:
+      "Total volunteer hours outside of school. The national average for college-bound students is 80–100 hours, so you're ahead. Selective schools typically look for 150–200 hours of sustained involvement in one cause.",
+    icon: Heart,
+    importance: 6,
+    effort: 2,
+  },
+  {
+    label: "Improvement Velocity",
+    value: "+6 pts in last 90 days",
+    percentile: 78,
+    description:
+      "How quickly your profile is improving compared to other students. You've climbed 6 percentile points in 90 days — faster than most. If you started behind, this is the one score where you can reach #1.",
+    icon: TrendingUp,
+    importance: 7,
+    effort: 2,
+  },
 ];
 
 type SortOrder =
@@ -84,26 +150,39 @@ function loadVisibility(): boolean {
   }
 }
 
-/** Earned states stay warm-lavender; only true excellence tips into emerald. */
 function barGradient(p: number): string {
   if (p >= 90) return "linear-gradient(90deg, #34d399, #10b981)";
-  return "linear-gradient(90deg, #c9b8ff, #8b5cf6)";
+  if (p >= 75) return "linear-gradient(90deg, #818cf8, #6d28d9)";
+  if (p >= 50) return "linear-gradient(90deg, #fbbf24, #f59e0b)";
+  return "linear-gradient(90deg, #f87171, #ef4444)";
+}
+
+type Tier = { label: string; classes: string };
+
+function getTier(p: number): Tier {
+  if (p >= 90) return { label: "Excellent", classes: "bg-emerald-100 text-emerald-700" };
+  if (p >= 75) return { label: "Good",      classes: "bg-lavender-100 text-lavender-700" };
+  if (p >= 50) return { label: "Average",   classes: "bg-amber-100 text-amber-700" };
+  return       { label: "Needs Work",       classes: "bg-red-100 text-red-600" };
 }
 
 function MetricRow({ metric }: { metric: Metric }) {
   const Icon = metric.icon;
+  const tier = getTier(metric.percentile);
 
   return (
     <div className="rounded-2xl border border-lavender-200/70 bg-lavender-50/60 p-4 transition duration-300 hover:-translate-y-0.5 hover:shadow-soft">
-      <div className="mb-2.5 flex items-center justify-between gap-2">
-        <div className="flex min-w-0 items-center gap-2 text-sm font-semibold text-ink">
-          <Icon size={15} className="flex-shrink-0 text-lavender-600" />
-          <span className="truncate">{metric.label}</span>
+      <div className="mb-2.5 flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm font-semibold text-ink">
+          <Icon size={15} className="mt-px flex-shrink-0 text-lavender-600" />
+          <span>{metric.label}</span>
         </div>
-        <span className="flex-shrink-0 text-sm font-bold tabular-nums text-ink">
-          {metric.value}
+        <span className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${tier.classes}`}>
+          {tier.label}
         </span>
       </div>
+
+      <p className="mb-2.5 text-sm font-bold text-ink">{metric.value}</p>
 
       <div className="h-2 w-full overflow-hidden rounded-full bg-lavender-100">
         <div
@@ -112,7 +191,11 @@ function MetricRow({ metric }: { metric: Metric }) {
         />
       </div>
       <p className="mt-1.5 text-right text-xs font-medium text-ink-soft">
-        {metric.percentile}th percentile
+        {metric.percentile}th percentile nationally
+      </p>
+
+      <p className="mt-3 text-xs leading-relaxed text-ink-muted">
+        {metric.description}
       </p>
     </div>
   );
