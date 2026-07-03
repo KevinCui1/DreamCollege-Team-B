@@ -22,6 +22,8 @@ import {
   requestBestNextTask,
   type BestNextTaskResult,
 } from "../lib/bestNextTask";
+import { useFeedback } from "../context/FeedbackContext";
+import { bestNextTaskFeedback } from "../data/feedbackQuestions";
 
 type Props = { onClose: () => void };
 
@@ -68,6 +70,7 @@ export default function BestNextTaskPanel({ onClose }: Props) {
   const { isMilestoneEarned, nextMilestone, gradeAchievements } =
     useAchievement();
   const { currentRank } = useRank();
+  const { triggerFeedback } = useFeedback();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -91,6 +94,7 @@ export default function BestNextTaskPanel({ onClose }: Props) {
       });
       const res = await requestBestNextTask(context);
       setResult(res);
+      triggerFeedback(bestNextTaskFeedback, 1500);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong.");
     } finally {

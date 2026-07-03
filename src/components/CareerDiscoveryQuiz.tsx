@@ -5,6 +5,8 @@ import {
   useStudentProfile,
   type QuizAnswers,
 } from "../context/StudentProfileContext";
+import { useFeedback } from "../context/FeedbackContext";
+import { quizFeedback } from "../data/feedbackQuestions";
 
 type Props = {
   done: boolean;
@@ -13,6 +15,7 @@ type Props = {
 
 export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
   const { quizAnswers, setQuizAnswers } = useStudentProfile();
+  const { triggerFeedback } = useFeedback();
 
   const [taking, setTaking] = useState(!done || !quizAnswers);
   const [step, setStep] = useState(0);
@@ -35,6 +38,7 @@ export default function CareerDiscoveryQuiz({ done, onComplete }: Props) {
       setQuizAnswers(answers);
       if (!done) onComplete();
       setTaking(false);
+      triggerFeedback(quizFeedback);
     } else {
       setStep((s) => s + 1);
     }
