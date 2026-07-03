@@ -29,7 +29,7 @@ next to the Reset button. It asks Claude to recommend the student's single best
 next step. To enable it, add an API key:
 
 ```bash
-cp .env.example .env.local      # then edit .env.local and set ANTHROPIC_API_KEY
+cp .env.example .env.local      # then edit .env.local and set GEMINI_API_KEY
 ```
 
 The key is read **only** by the dev/preview server (`vite.config.ts` →

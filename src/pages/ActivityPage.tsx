@@ -5,11 +5,14 @@ import { activityPath, findActivity } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
 import Confetti from "../components/Confetti";
 import CareerDiscoveryQuiz from "../components/CareerDiscoveryQuiz";
+import CollegeProfileForm from "../components/CollegeProfileForm";
 import { milestones } from "../data/achievements";
 import { useAchievement } from "../context/AchievementContext";
 
 /** Slug of the activity that renders the interactive Career Discovery Quiz. */
 const CAREER_DISCOVERY_QUIZ_SLUG = "career-discovery-quiz";
+/** Slug of the activity that renders the College Profile form. */
+const COLLEGE_PROFILE_SLUG = "college-profile";
 
 const CONFETTI_DURATION_MS = 4500;
 
@@ -66,6 +69,8 @@ export default function ActivityPage() {
       <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
         {item.slug === CAREER_DISCOVERY_QUIZ_SLUG ? (
           <CareerDiscoveryQuiz done={done} onComplete={handleComplete} />
+        ) : item.slug === COLLEGE_PROFILE_SLUG ? (
+          <CollegeProfileForm done={done} onComplete={handleComplete} />
         ) : done ? (
           <div>
             <div className="flex items-center gap-2 text-emerald-600">

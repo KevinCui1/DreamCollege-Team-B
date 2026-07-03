@@ -22,17 +22,30 @@ export type RoadmapEntry = {
  * The "best next step" recommendation, folded into the timeline instead of
  * living in its own panel. Optional so a roadmap generated before the backend
  * returns this field still renders fine (no recommendation card shown).
+ *
+ * `sectionId` is the slug of the app section the LLM is routing the student to
+ * (e.g. "positioning-statement"), resolved to a link via `findSectionBySlug`.
  */
 export type RoadmapRecommendation = {
   bestTask: string;
   why: string;
-  appTool: string;
+  sectionId: string;
   missingInfo: string[];
+};
+
+/**
+ * A secondary "also recommended" section pick, shown in a smaller slot beneath
+ * the single highlighted best next step.
+ */
+export type SectionPick = {
+  sectionId: string;
+  why: string;
 };
 
 export type GeneratedRoadmap = {
   entries: RoadmapEntry[];
   recommendation?: RoadmapRecommendation;
+  sectionPicks?: SectionPick[];
   generatedAt: string;
 };
 
@@ -58,16 +71,25 @@ export function saveRoadmap(roadmap: GeneratedRoadmap): void {
   }
 }
 
+/**
+ * One section of the app the LLM can route the student to, with a description
+ * of what it's for. This is the catalog the "best next step" recommendation
+ * and section picks must choose from.
+ */
+export type AvailableSection = {
+  id: string;
+  label: string;
+  path: string;
+  group: string;
+  purpose: string;
+  done: boolean;
+};
+
 export type RoadmapContext = {
   quiz: { question: string; answer: string }[];
-  profile: {
-    gradeLevel: string;
-    gpa: string;
-    apCount: string;
-    interests: string;
-    goals: string;
-    constraints: string;
-  };
+  profile: StudentProfile;
+  /** Every app section with its purpose + completion state — the LLM routes from this. */
+  availableSections: AvailableSection[];
   completedActivities: string[];
   /** Everything not yet done — helps the LLM avoid recommending finished work. */
   incompleteActivities: string[];
@@ -88,12 +110,22 @@ export function buildRoadmapContext(args: {
 }): RoadmapContext {
   const completedActivities: string[] = [];
   const incompleteActivities: string[] = [];
+  const availableSections: AvailableSection[] = [];
 
   for (const group of navigation) {
     for (const item of group.items) {
       const path = activityPath(group.slug, item.slug);
-      if (args.isComplete(path)) completedActivities.push(item.label);
+      const done = args.isComplete(path);
+      if (done) completedActivities.push(item.label);
       else incompleteActivities.push(item.label);
+      availableSections.push({
+        id: item.slug,
+        label: item.label,
+        path,
+        group: group.label,
+        purpose: item.purpose,
+        done,
+      });
     }
   }
 
@@ -108,6 +140,7 @@ export function buildRoadmapContext(args: {
   return {
     quiz,
     profile: args.profile,
+    availableSections,
     completedActivities,
     incompleteActivities,
     lastCompletedActivity: args.lastCompletedActivity ?? null,
@@ -147,6 +180,7 @@ export async function requestRoadmap(
   const result = data as {
     entries?: unknown[];
     recommendation?: unknown;
+    sectionPicks?: unknown[];
   } | null;
 
   if (!result || !Array.isArray(result.entries)) {
@@ -157,6 +191,9 @@ export async function requestRoadmap(
     entries: result.entries as RoadmapEntry[],
     recommendation: result.recommendation
       ? (result.recommendation as RoadmapRecommendation)
+      : undefined,
+    sectionPicks: Array.isArray(result.sectionPicks)
+      ? (result.sectionPicks as SectionPick[])
       : undefined,
     generatedAt: new Date().toISOString(),
   };

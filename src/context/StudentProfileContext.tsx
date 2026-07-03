@@ -18,7 +18,11 @@ export type QuizAnswers = Record<string, string>;
 export type StudentProfile = {
   gradeLevel: string;
   gpa: string;
+  gpaScale: string;
   apCount: string;
+  testScores: string;
+  extracurriculars: string;
+  extracurricularAwards: string;
   interests: string;
   goals: string;
   constraints: string;
@@ -27,7 +31,11 @@ export type StudentProfile = {
 export const emptyProfile: StudentProfile = {
   gradeLevel: "",
   gpa: "",
+  gpaScale: "",
   apCount: "",
+  testScores: "",
+  extracurriculars: "",
+  extracurricularAwards: "",
   interests: "",
   goals: "",
   constraints: "",

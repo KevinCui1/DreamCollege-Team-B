@@ -7,7 +7,6 @@
 
 import type { LucideIcon } from "lucide-react";
 import {
-  UserRound,
   Compass,
   Telescope,
   GraduationCap,
@@ -38,15 +37,6 @@ export type JourneyMilestone = {
 // so the road ahead reads at a glance.
 
 export const JOURNEY: JourneyMilestone[] = [
-  {
-    id: "profile",
-    title: "Set up your profile",
-    blurb:
-      "Share your grades, interests, and goals so every recommendation is tailored to you.",
-    timeframe: "Start here",
-    icon: UserRound,
-    activities: ["/college-planning/college-profile"],
-  },
   {
     id: "direction",
     title: "Discover your direction",

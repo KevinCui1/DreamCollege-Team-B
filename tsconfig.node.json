@@ -9,6 +9,7 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "composite": true,
+    "outDir": "./node_modules/.tsc-out/node",
     "strict": true
   },
   "include": ["vite.config.ts", "vite-plugins"]

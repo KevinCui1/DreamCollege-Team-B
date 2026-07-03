@@ -7,7 +7,6 @@ import {
   Briefcase,
   Building2,
   Check,
-  ChevronDown,
   DollarSign,
   FileText,
   HelpCircle,
@@ -18,20 +17,14 @@ import {
   Sparkles,
   Target,
   User,
-  Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { useCompletion } from "../context/CompletionContext";
 import { useAchievement } from "../context/AchievementContext";
-import {
-  useStudentProfile,
-  type StudentProfile,
-} from "../context/StudentProfileContext";
+import { useStudentProfile } from "../context/StudentProfileContext";
 import { makeItemDone } from "../lib/nextStep";
 import {
   JOURNEY_COUNT,
-  milestoneHref,
-  milestoneProgress,
   sequenceJourney,
   type JourneyMilestone,
 } from "../lib/journey";
@@ -43,52 +36,15 @@ import {
   type GeneratedRoadmap,
   type RoadmapEntry,
   type RoadmapEntryCategory,
+  type SectionPick,
 } from "../lib/roadmap";
+import { findSectionBySlug } from "../data/navigation";
 import { softCard, eyebrow } from "../theme";
-
-// ── Optional profile fields shown in the collapsible "Tell us more" panel ───
-
-type ProfileField = {
-  key:
-    | "gradeLevel"
-    | "gpa"
-    | "apCount"
-    | "interests"
-    | "goals"
-    | "constraints";
-  label: string;
-  placeholder: string;
-  multiline?: boolean;
-};
-
-const PROFILE_FIELDS: ProfileField[] = [
-  { key: "gradeLevel", label: "Grade level", placeholder: "e.g. 11th grade" },
-  { key: "gpa", label: "GPA", placeholder: "e.g. 3.8 / 4.0" },
-  { key: "apCount", label: "APs taken / planned", placeholder: "e.g. 4" },
-  {
-    key: "interests",
-    label: "Interests & extracurriculars",
-    placeholder: "e.g. robotics club, volunteering, soccer",
-    multiline: true,
-  },
-  {
-    key: "goals",
-    label: "Goals",
-    placeholder: "e.g. study computer science, get into a state school",
-    multiline: true,
-  },
-  {
-    key: "constraints",
-    label: "Constraints",
-    placeholder: "e.g. need scholarships, prefer to stay in-state",
-    multiline: true,
-  },
-];
 
 export default function JourneyTimeline() {
   const { isComplete, completedPaths } = useCompletion();
   const { gradeAchievements } = useAchievement();
-  const { quizAnswers, profile, updateProfile } = useStudentProfile();
+  const { quizAnswers, profile } = useStudentProfile();
 
   const itemDone = useMemo(
     () => makeItemDone(isComplete, gradeAchievements),
@@ -108,7 +64,6 @@ export default function JourneyTimeline() {
   );
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
-  const [showProfileForm, setShowProfileForm] = useState(false);
   const [autoUpdating, setAutoUpdating] = useState(false);
 
   const handleGenerate = async (lastCompletedActivity?: string | null) => {
@@ -172,10 +127,6 @@ export default function JourneyTimeline() {
         isGenerating={isGenerating}
         generateError={generateError}
         onGenerate={() => handleGenerate(null)}
-        profile={profile}
-        updateProfile={updateProfile}
-        showProfileForm={showProfileForm}
-        onToggleProfileForm={() => setShowProfileForm((s) => !s)}
       />
     );
   }
@@ -191,7 +142,7 @@ export default function JourneyTimeline() {
             Your roadmap
           </h2>
           <p className="mt-0.5 text-sm text-ink-muted">
-            A personalized path to college — built around your goals.
+            A personalized path to college, built around your goals.
           </p>
         </div>
         <span className="flex-shrink-0 rounded-full bg-lavender-100 px-3 py-1 text-xs font-bold text-lavender-700">
@@ -212,12 +163,9 @@ export default function JourneyTimeline() {
         <RecommendationCard recommendation={roadmap.recommendation} />
       )}
 
-      <ProfileDetailsPanel
-        profile={profile}
-        updateProfile={updateProfile}
-        expanded={showProfileForm}
-        onToggle={() => setShowProfileForm((s) => !s)}
-      />
+      {roadmap.sectionPicks && roadmap.sectionPicks.length > 0 && (
+        <SectionPicksList picks={roadmap.sectionPicks} />
+      )}
 
       {/* Completed and current static milestones */}
       <ol className="space-y-0">
@@ -234,15 +182,6 @@ export default function JourneyTimeline() {
           </TimelineRow>
         ))}
 
-        {current && (
-          <TimelineRow
-            milestone={current}
-            state="current"
-            connector={roadmap.entries.length > 0 ? "muted" : "none"}
-          >
-            <CurrentCard milestone={current} itemDone={itemDone} />
-          </TimelineRow>
-        )}
       </ol>
 
       {allDone && (
@@ -337,6 +276,7 @@ function RecommendationCard({
 }: {
   recommendation: NonNullable<GeneratedRoadmap["recommendation"]>;
 }) {
+  const section = findSectionBySlug(recommendation.sectionId);
   return (
     <div className="mb-6 rounded-2xl border border-lavender-300/60 bg-gradient-to-br from-lavender-50 to-white p-5 shadow-soft">
       <div className="flex items-center gap-2">
@@ -356,13 +296,14 @@ function RecommendationCard({
         </div>
       )}
 
-      {recommendation.appTool && (
-        <div className="mt-2 flex items-start gap-2">
-          <Wrench size={15} className="mt-0.5 flex-shrink-0 text-emerald-600" />
-          <p className="text-sm leading-relaxed text-ink-muted">
-            {recommendation.appTool}
-          </p>
-        </div>
+      {section && (
+        <Link
+          to={section.path}
+          className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-lavender-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-soft transition hover:bg-lavender-700"
+        >
+          Go to {section.label}
+          <ArrowRight size={13} strokeWidth={2.5} />
+        </Link>
       )}
 
       {recommendation.missingInfo.length > 0 && (
@@ -379,76 +320,42 @@ function RecommendationCard({
   );
 }
 
-// ── Collapsible "tell us more about you" profile panel ─────────────────────
+// ── Other recommended sections (smaller slots beneath the best next step) ───
 
-function ProfileDetailsPanel({
-  profile,
-  updateProfile,
-  expanded,
-  onToggle,
-}: {
-  profile: StudentProfile;
-  updateProfile: (patch: Partial<StudentProfile>) => void;
-  expanded: boolean;
-  onToggle: () => void;
-}) {
+function SectionPicksList({ picks }: { picks: SectionPick[] }) {
+  const resolved = picks
+    .map((pick) => ({ pick, section: findSectionBySlug(pick.sectionId) }))
+    .filter(
+      (r): r is { pick: SectionPick; section: NonNullable<ReturnType<typeof findSectionBySlug>> } =>
+        r.section !== null,
+    );
+
+  if (resolved.length === 0) return null;
+
   return (
-    <div className="mb-6 rounded-2xl border border-lavender-100 bg-lavender-50/50 p-4">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="flex w-full items-center justify-between gap-2 text-left"
-      >
-        <span className="text-xs font-bold uppercase tracking-widest text-lavender-600">
-          Tell us more about you
-        </span>
-        <ChevronDown
-          size={16}
-          className={`text-lavender-400 transition-transform ${
-            expanded ? "rotate-180" : ""
-          }`}
-        />
-      </button>
-      <p className="mt-1 text-xs text-ink-soft">
-        Optional — sharpens your plan. Your quiz answers and progress are
-        already included automatically.
-      </p>
-
-      {expanded && (
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          {PROFILE_FIELDS.map((field) => (
-            <div
-              key={field.key}
-              className={field.multiline ? "sm:col-span-2" : ""}
+    <div className="mb-6">
+      <p className={`${eyebrow} mb-2`}>Also worth a look</p>
+      <ul className="space-y-2">
+        {resolved.map(({ pick, section }) => (
+          <li
+            key={pick.sectionId}
+            className="rounded-xl border border-lavender-100 bg-white/60 p-3"
+          >
+            <Link
+              to={section.path}
+              className="inline-flex items-center gap-1 text-sm font-semibold text-lavender-700 hover:text-lavender-800"
             >
-              <label className="mb-1 block text-xs font-medium text-slate-600">
-                {field.label}
-              </label>
-              {field.multiline ? (
-                <textarea
-                  value={profile[field.key]}
-                  onChange={(e) =>
-                    updateProfile({ [field.key]: e.target.value })
-                  }
-                  placeholder={field.placeholder}
-                  rows={2}
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-lavender-400 focus:ring-2 focus:ring-lavender-100"
-                />
-              ) : (
-                <input
-                  type="text"
-                  value={profile[field.key]}
-                  onChange={(e) =>
-                    updateProfile({ [field.key]: e.target.value })
-                  }
-                  placeholder={field.placeholder}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-lavender-400 focus:ring-2 focus:ring-lavender-100"
-                />
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+              {section.label}
+              <ArrowRight size={13} strokeWidth={2.5} />
+            </Link>
+            {pick.why && (
+              <p className="mt-0.5 text-sm leading-relaxed text-ink-muted">
+                {pick.why}
+              </p>
+            )}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -546,18 +453,10 @@ function GenerateCard({
   isGenerating,
   generateError,
   onGenerate,
-  profile,
-  updateProfile,
-  showProfileForm,
-  onToggleProfileForm,
 }: {
   isGenerating: boolean;
   generateError: string | null;
   onGenerate: () => void;
-  profile: StudentProfile;
-  updateProfile: (patch: Partial<StudentProfile>) => void;
-  showProfileForm: boolean;
-  onToggleProfileForm: () => void;
 }) {
   return (
     <section className={`${softCard} p-8 text-center`}>
@@ -580,15 +479,6 @@ function GenerateCard({
             action plan — including your best next step — for your entire
             college journey.
           </p>
-
-          <div className="mx-auto mt-5 max-w-sm text-left">
-            <ProfileDetailsPanel
-              profile={profile}
-              updateProfile={updateProfile}
-              expanded={showProfileForm}
-              onToggle={onToggleProfileForm}
-            />
-          </div>
 
           {generateError && (
             <div className="mx-auto mt-4 flex max-w-sm items-start gap-3 rounded-2xl border border-rose-200/70 bg-rose-50 p-4 text-left">
@@ -666,66 +556,6 @@ function TimelineRow({
         {children}
       </div>
     </li>
-  );
-}
-
-// ── "You are here" expanded card ─────────────────────────────────────────────
-
-function CurrentCard({
-  milestone,
-  itemDone,
-}: {
-  milestone: JourneyMilestone;
-  itemDone: Parameters<typeof milestoneProgress>[1];
-}) {
-  const { done, total } = milestoneProgress(milestone, itemDone);
-  const started = done > 0;
-  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
-
-  return (
-    <div className="rounded-2xl border border-lavender-300/60 bg-gradient-to-br from-lavender-50 to-white p-5 shadow-soft">
-      <div className="flex items-center gap-2">
-        <p className={eyebrow}>You are here</p>
-        <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink-soft">
-          · {milestone.timeframe}
-        </span>
-      </div>
-      <h3 className="mt-1.5 font-display text-xl font-bold leading-tight tracking-tight text-ink">
-        {milestone.title}
-      </h3>
-      <p className="mt-1.5 text-sm leading-relaxed text-ink-muted">
-        {milestone.blurb}
-      </p>
-
-      {total > 1 && (
-        <div className="mt-4">
-          <div className="mb-1.5 flex items-center justify-between text-[11px] font-semibold text-ink-soft">
-            <span>Progress</span>
-            <span className="tabular-nums">
-              {done} / {total} tasks
-            </span>
-          </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-lavender-100">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-lavender-500 to-lavender-700 transition-[width] duration-700 ease-out"
-              style={{ width: `${Math.max(pct, done > 0 ? 6 : 0)}%` }}
-            />
-          </div>
-        </div>
-      )}
-
-      <Link
-        to={milestoneHref(milestone, itemDone)}
-        className="group mt-4 inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-br from-lavender-600 to-lavender-700 px-5 py-3 text-sm font-bold text-white shadow-soft transition duration-200 hover:-translate-y-0.5 hover:shadow-soft-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lavender-500 focus-visible:ring-offset-2 active:translate-y-0"
-      >
-        {started ? "Continue" : "Start"}
-        <ArrowRight
-          size={16}
-          strokeWidth={2.5}
-          className="transition-transform duration-200 group-hover:translate-x-0.5"
-        />
-      </Link>
-    </div>
   );
 }
 
