@@ -71,6 +71,14 @@ export function saveRoadmap(roadmap: GeneratedRoadmap): void {
   }
 }
 
+export function clearRoadmap(): void {
+  try {
+    localStorage.removeItem(ROADMAP_STORAGE_KEY);
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
 /**
  * One section of the app the LLM can route the student to, with a description
  * of what it's for. This is the catalog the "best next step" recommendation

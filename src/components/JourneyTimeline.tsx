@@ -30,6 +30,7 @@ import {
 } from "../lib/journey";
 import {
   buildRoadmapContext,
+  clearRoadmap,
   loadRoadmap,
   requestRoadmap,
   saveRoadmap,
@@ -113,6 +114,16 @@ export default function JourneyTimeline() {
     prevCompletedPathsRef.current = completedPaths;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [completedPaths]);
+
+  // If the setup prerequisites get wiped (e.g. "Reset progress"), discard any
+  // previously generated roadmap so redoing the two tasks requires a fresh
+  // generation instead of showing the stale one.
+  useEffect(() => {
+    if (!setupDone && roadmap) {
+      clearRoadmap();
+      setRoadmap(null);
+    }
+  }, [setupDone, roadmap]);
 
   // Phase 1: Prerequisites not complete — show focused starter card
   if (!setupDone) {
@@ -463,7 +474,9 @@ function GenerateCard({
   onGenerate: () => void;
 }) {
   return (
-    <section className={`${softCard} p-8 text-center`}>
+    <section
+      className={`${softCard} bg-gradient-to-b from-lavender-200 to-lavender-100 p-8 text-center`}
+    >
       {isGenerating ? (
         <div className="flex items-center justify-center gap-2.5 py-5 text-sm text-ink-muted">
           <Loader2 size={17} className="animate-spin text-lavender-500" />
@@ -479,9 +492,8 @@ function GenerateCard({
             Ready to generate your roadmap
           </h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-ink-muted">
-            Based on your profile and career quiz, we'll build a personalized
-            action plan — including your best next step — for your entire
-            college journey.
+            We'll pinpoint your best next step, map the follow-up steps after
+            it, and chart a roadmap for the rest of your college journey.
           </p>
 
           {generateError && (
