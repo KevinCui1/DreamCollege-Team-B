@@ -112,7 +112,7 @@ export default function CollegeProfileWizard({ done, onComplete }: Props) {
     <div className="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-col md:flex-row">
         {/* Left rail */}
-        <aside className="shrink-0 border-b border-slate-100 bg-lavender-50/60 p-8 md:w-72 md:border-b-0 md:border-r">
+        <aside className="shrink-0 border-b border-slate-100 bg-lavender-50/60 p-6 md:w-60 md:border-b-0 md:border-r">
           <Stepper
             steps={STEPS}
             current={step}

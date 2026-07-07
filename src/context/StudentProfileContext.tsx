@@ -269,9 +269,10 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
   );
 
   const resetProfile = useCallback(() => {
+    // Deliberately preserve the structured College Profile (`applicationProfile`)
+    // so resetting progress never wipes the user's saved profile inputs.
     setQuizAnswersState(null);
     setProfile(emptyProfile);
-    setApplicationProfile(emptyApplicationProfile);
   }, []);
 
   const value = useMemo<StudentProfileContextValue>(

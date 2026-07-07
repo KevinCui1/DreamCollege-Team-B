@@ -64,7 +64,7 @@ export default function ActivityPage() {
 
   return (
     <div
-      className={`mx-auto px-8 py-10 ${isCollegeProfile ? "max-w-6xl" : "max-w-3xl"}`}
+      className={`mx-auto px-8 py-10 ${isCollegeProfile ? "max-w-7xl" : "max-w-3xl"}`}
     >
       {xpAward !== null && (
         <XpCelebration amount={xpAward} onDone={() => setXpAward(null)} />
