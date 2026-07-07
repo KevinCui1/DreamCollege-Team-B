@@ -50,11 +50,11 @@ export default function DashboardHome() {
         </p>
       </header>
 
-      {/* ── Where you stand ── */}
-      <NationalRanking />
-
       {/* ── Unified planning module ── */}
       <JourneyTimeline />
+
+      {/* ── Where you stand ── */}
+      <NationalRanking />
 
       {/* ── Progress at a glance ── */}
       <ExperienceBar />
