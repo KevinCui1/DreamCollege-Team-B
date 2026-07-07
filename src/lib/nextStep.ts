@@ -70,7 +70,48 @@ export const XP_ITEMS: XPItem[] = [
   { type: "grade", id: "12-5", label: "Prepare for your college transition and orientation",  group: "12th Grade" },
 ];
 
-export const TOTAL_XP = XP_ITEMS.length; // 34
+// ── Experience points ────────────────────────────────────────────────────────
+// XP is awarded for the Career Planning and College Planning activity tabs only.
+// Completing the profile and the Career Discovery Quiz is worth 100 XP each;
+// every other Career/College Planning activity is worth 50 XP. College
+// Application tasks and the four-year-plan grade tasks are tracked for the
+// journey but award no XP.
+
+/** Completing the profile is worth 100 XP. */
+export const XP_PROFILE_PATH = "/college-planning/college-profile";
+/** Completing the Career Discovery Quiz is worth 100 XP. */
+export const XP_QUIZ_PATH = "/career-planning/career-discovery-quiz";
+
+const XP_HIGH = 100;
+const XP_STANDARD = 50;
+
+/** XP awarded for completing a given activity path (0 if it isn't XP-bearing). */
+export function xpForPath(path: string): number {
+  // College Application tasks award no experience.
+  if (path.startsWith("/college-application/")) return 0;
+  if (path === XP_PROFILE_PATH || path === XP_QUIZ_PATH) return XP_HIGH;
+  return XP_STANDARD;
+}
+
+/** Every activity path that awards XP, in journey order. */
+export const XP_ACTIVITY_PATHS: string[] = XP_ITEMS.filter(
+  (item): item is XPActivityItem =>
+    item.type === "activity" && xpForPath(item.path) > 0,
+).map((item) => item.path);
+
+/** Maximum XP reachable (100 + 100 + 10 × 50 = 700). */
+export const TOTAL_XP = XP_ACTIVITY_PATHS.reduce(
+  (sum, path) => sum + xpForPath(path),
+  0,
+);
+
+/** Total XP earned so far from completed activities. */
+export function earnedXp(isComplete: (path: string) => boolean): number {
+  return XP_ACTIVITY_PATHS.reduce(
+    (sum, path) => (isComplete(path) ? sum + xpForPath(path) : sum),
+    0,
+  );
+}
 
 /** Where an activity item links to. Grade items route to the Achievement Map. */
 export function itemHref(item: XPItem): string {
@@ -90,11 +131,6 @@ export function makeItemDone(
     const a = gradeAchievements.find((g) => g.id === item.id);
     return a?.completed ?? false;
   };
-}
-
-/** Total XP earned — any completed item counts, order-independent. */
-export function countEarned(itemDone: (item: XPItem) => boolean): number {
-  return XP_ITEMS.filter(itemDone).length;
 }
 
 /** First uncompleted item in journey order — the recommended next step. */

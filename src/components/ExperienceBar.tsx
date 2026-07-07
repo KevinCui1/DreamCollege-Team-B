@@ -1,46 +1,49 @@
-import { Fragment, useMemo } from "react";
-import { Compass, Navigation2, Rocket, Wrench } from "lucide-react";
+import { useMemo } from "react";
+import { Compass, MapPinned, Rocket, Wrench } from "lucide-react";
 import { useCompletion } from "../context/CompletionContext";
-import { useAchievement } from "../context/AchievementContext";
 import { useRank } from "../context/RankContext";
 import { ranks } from "../data/ranks";
-import {
-  TOTAL_XP,
-  countEarned,
-  makeItemDone,
-} from "../lib/nextStep";
+import { TOTAL_XP, earnedXp } from "../lib/nextStep";
 import { softCard } from "../theme";
 
 // ── Rank icon map ──────────────────────────────────────────────────────────
 
 const RANK_ICONS = {
   "explorer":     Compass,
-  "navigator":    Navigation2,
+  "planner":      MapPinned,
   "builder":      Wrench,
   "launch-ready": Rocket,
 } as const;
 
+/** Chart plot height in pixels — ticks and the bar are positioned within it. */
+const CHART_H = 240;
+
 // ── Main component ─────────────────────────────────────────────────────────
-// A calm "progress at a glance" widget: current rank, XP counter, a single
-// cohesive lavender progress bar, and the four-stop rank ladder. The recommended
-// next step lives in the dashboard hero spotlight, not here.
+// The experience bar, drawn as a single-column bar chart: a numerical XP y-axis
+// whose ticks are labeled with each rank, gridlines at every rank threshold, and
+// a column that rises to the student's current XP.
 
 export default function ExperienceBar() {
   const { isComplete } = useCompletion();
-  const { gradeAchievements } = useAchievement();
   const { currentRank } = useRank();
 
-  const itemDone = useMemo(
-    () => makeItemDone(isComplete, gradeAchievements),
-    [isComplete, gradeAchievements],
-  );
+  const xp = useMemo(() => earnedXp(isComplete), [isComplete]);
+  const xpPct = TOTAL_XP === 0 ? 0 : (xp / TOTAL_XP) * 100;
+  const isFull = xp >= TOTAL_XP;
 
-  const earnedXP = useMemo(() => countEarned(itemDone), [itemDone]);
-  const xpPct = TOTAL_XP === 0 ? 0 : Math.round((earnedXP / TOTAL_XP) * 100);
-  const isFull = earnedXP === TOTAL_XP;
+  // The next rank the student hasn't reached yet (null once Launch Ready is hit).
+  const nextRank = useMemo(
+    () => ranks.find((r) => r.xpThreshold > xp) ?? null,
+    [xp],
+  );
+  const xpToNext = nextRank ? nextRank.xpThreshold - xp : 0;
 
   const RankIcon =
     RANK_ICONS[currentRank.id as keyof typeof RANK_ICONS] ?? Compass;
+
+  // Bottom offset (%) for a given XP value on the chart scale.
+  const offsetPct = (value: number) =>
+    TOTAL_XP === 0 ? 0 : (value / TOTAL_XP) * 100;
 
   return (
     <div className={`${softCard} p-7`}>
@@ -65,65 +68,90 @@ export default function ExperienceBar() {
 
         <div className="flex-shrink-0 text-right">
           <p className="font-display text-4xl font-bold tabular-nums leading-none tracking-tight text-ink">
-            {earnedXP}
-            <span className="text-xl font-semibold text-ink-soft"> / {TOTAL_XP}</span>
+            {xp}
+            <span className="text-xl font-semibold text-ink-soft"> XP</span>
           </p>
           <p className="mt-1.5 text-xs font-semibold text-ink-soft">
-            {isFull ? "All steps complete" : `${xpPct}% of your journey`}
+            {isFull
+              ? "Max rank reached"
+              : `${xpToNext} XP to ${nextRank?.name}`}
           </p>
         </div>
       </div>
 
-      {/* ── Single cohesive progress bar ── */}
-      <div className="mt-5">
-        <div className="h-4 w-full overflow-hidden rounded-full bg-lavender-100">
-          <div
-            className="relative h-full rounded-full transition-[width] duration-700 ease-out"
-            style={{
-              width: `${Math.max(xpPct, earnedXP > 0 ? 4 : 0)}%`,
-              backgroundImage: isFull
-                ? "linear-gradient(90deg, #34d399, #10b981)"
-                : "linear-gradient(90deg, #c9b8ff, #8b5cf6 55%, #7c3aed)",
-            }}
-          >
-            {earnedXP > 0 && (
-              <div className="xp-shimmer absolute inset-0 w-1/3 bg-white/25" />
-            )}
+      {/* ── Bar chart: rank-labeled numerical y-axis + XP column ── */}
+      <div className="mt-7 flex gap-3">
+        {/* Y-axis: one tick per rank, showing its XP threshold + name. */}
+        <div
+          className="relative w-24 flex-shrink-0"
+          style={{ height: CHART_H }}
+          aria-hidden="true"
+        >
+          {ranks.map((rank) => {
+            const reached = xp >= rank.xpThreshold;
+            const current = rank.id === currentRank.id;
+            return (
+              <div
+                key={rank.id}
+                className="absolute right-0 flex translate-y-1/2 flex-col items-end text-right"
+                style={{ bottom: `${offsetPct(rank.xpThreshold)}%` }}
+              >
+                <span
+                  className={`font-display text-sm font-bold tabular-nums leading-none ${
+                    reached ? "text-lavender-700" : "text-ink-soft"
+                  }`}
+                >
+                  {rank.xpThreshold}
+                </span>
+                <span
+                  className={`mt-0.5 text-[10px] font-semibold leading-tight ${
+                    current
+                      ? "text-lavender-600"
+                      : reached
+                      ? "text-ink-muted"
+                      : "text-ink-soft/70"
+                  }`}
+                >
+                  {rank.name}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Plot area: gridlines at each threshold + the rising XP column. */}
+        <div
+          className="relative flex-1 border-l border-lavender-200"
+          style={{ height: CHART_H }}
+        >
+          {/* Threshold gridlines */}
+          {ranks.map((rank) => {
+            const reached = xp >= rank.xpThreshold;
+            return (
+              <div
+                key={rank.id}
+                className={`absolute inset-x-0 border-t border-dashed ${
+                  reached ? "border-lavender-300" : "border-lavender-200/70"
+                }`}
+                style={{ bottom: `${offsetPct(rank.xpThreshold)}%` }}
+                aria-hidden="true"
+              />
+            );
+          })}
+
+          {/* The XP column — a solid purple bar that grows vertically with XP.
+              The wrapper spans the full plot height so the bar's percentage
+              height resolves against the chart, and items-end anchors it to the
+              baseline. */}
+          <div className="absolute inset-x-4 inset-y-0 flex items-end justify-center">
+            <div
+              className={`w-1/2 rounded-t-xl transition-[height] duration-700 ease-out ${
+                isFull ? "bg-emerald-500" : "bg-lavender-600"
+              }`}
+              style={{ height: `${Math.max(xpPct, xp > 0 ? 3 : 0)}%` }}
+            />
           </div>
         </div>
-      </div>
-
-      {/* ── Rank progression track ── */}
-      <div className="mt-6 flex items-center gap-1">
-        {ranks.map((rank, i) => {
-          const Icon =
-            RANK_ICONS[rank.id as keyof typeof RANK_ICONS] ?? Compass;
-          const earned = currentRank.order >= rank.order;
-          const current = currentRank.order === rank.order;
-          return (
-            <Fragment key={rank.id}>
-              <div
-                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-bold transition-all duration-300 ${
-                  current
-                    ? "bg-gradient-to-br from-lavender-600 to-lavender-700 text-white shadow-soft"
-                    : earned
-                    ? "bg-lavender-100 text-lavender-700"
-                    : "text-ink-soft/60"
-                }`}
-              >
-                <Icon size={11} strokeWidth={2.5} />
-                {rank.name}
-              </div>
-              {i < ranks.length - 1 && (
-                <div
-                  className={`h-0.5 flex-1 rounded-full transition-colors duration-500 ${
-                    earned ? "bg-lavender-300" : "bg-lavender-100"
-                  }`}
-                />
-              )}
-            </Fragment>
-          );
-        })}
       </div>
     </div>
   );

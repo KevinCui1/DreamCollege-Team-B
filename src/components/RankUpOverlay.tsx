@@ -534,7 +534,7 @@ function OverlayContent({ rank }: { rank: Rank }) {
   const fadeStyle = (delayMs: number) =>
     reducedMotion ? undefined : { animationDelay: `${delayMs}ms` };
   const chevronCount = rank.order + 1;
-  // Decoration scales with the rank reached (1 Navigator → 3 Launch Ready).
+  // Decoration scales with the rank reached (1 Planner → 3 Launch Ready).
   const level = rank.order;
 
   return (

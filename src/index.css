@@ -198,3 +198,48 @@ body {
     animation: none !important;
   }
 }
+
+/* ── XP earned celebration ───────────────────────────────────────────────────
+   A full-screen moment when a task is completed: the card settles in, the coin
+   pops and gently bobs, expanding rings ripple out, and the amount springs up.
+   The component skips these entirely under prefers-reduced-motion. */
+
+@keyframes xp-celebrate-card {
+  0%   { opacity: 0; transform: scale(0.94) translateY(10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.xp-celebrate-card {
+  animation: xp-celebrate-card 0.4s cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+@keyframes xp-celebrate-coin {
+  0%   { opacity: 0; transform: scale(0.3) rotate(-25deg); }
+  55%  { opacity: 1; transform: scale(1.15) rotate(6deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes xp-celebrate-bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+.xp-celebrate-coin {
+  animation:
+    xp-celebrate-coin 0.6s cubic-bezier(0.2, 0, 0, 1) both,
+    xp-celebrate-bob 2.4s ease-in-out 0.6s infinite;
+}
+
+@keyframes xp-celebrate-ring {
+  0%   { opacity: 0.7; transform: scale(0.6); }
+  100% { opacity: 0;   transform: scale(2.1); }
+}
+.xp-celebrate-ring {
+  animation: xp-celebrate-ring 1.6s ease-out infinite;
+}
+
+@keyframes xp-celebrate-amount {
+  0%   { opacity: 0; transform: scale(0.6) translateY(14px); }
+  60%  { opacity: 1; transform: scale(1.08) translateY(0); }
+  100% { opacity: 1; transform: scale(1); }
+}
+.xp-celebrate-amount {
+  animation: xp-celebrate-amount 0.55s cubic-bezier(0.2, 0, 0, 1) 0.25s both;
+}

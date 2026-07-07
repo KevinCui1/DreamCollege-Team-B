@@ -3,25 +3,24 @@ import { Link, useParams } from "react-router-dom";
 import { CheckCircle2 } from "lucide-react";
 import { activityPath, findActivity } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
-import Confetti from "../components/Confetti";
+import XpCelebration from "../components/XpCelebration";
 import CareerDiscoveryQuiz from "../components/CareerDiscoveryQuiz";
 import CollegeProfileForm from "../components/CollegeProfileForm";
 import { milestones } from "../data/achievements";
 import { useAchievement } from "../context/AchievementContext";
 import { useFeedback } from "../context/FeedbackContext";
 import { activityFeedback } from "../data/feedbackQuestions";
+import { xpForPath } from "../lib/nextStep";
 
 /** Slug of the activity that renders the interactive Career Discovery Quiz. */
 const CAREER_DISCOVERY_QUIZ_SLUG = "career-discovery-quiz";
 /** Slug of the activity that renders the College Profile form. */
 const COLLEGE_PROFILE_SLUG = "college-profile";
 
-const CONFETTI_DURATION_MS = 4500;
-
 export default function ActivityPage() {
   const { groupSlug, itemSlug } = useParams();
   const { isComplete, complete } = useCompletion();
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [xpAward, setXpAward] = useState<number | null>(null);
   const { earnMilestone } = useAchievement();
   const { triggerFeedback } = useFeedback();
 
@@ -43,9 +42,15 @@ export default function ActivityPage() {
   const done = isComplete(path);
 
   const handleComplete = () => {
+    // Only celebrate genuinely new completions that actually award XP, so
+    // re-submits don't re-award and non-XP tasks don't pop a "+0 XP" moment.
+    const firstTime = !isComplete(path);
     complete(path);
-    setShowConfetti(true);
-    setTimeout(() => setShowConfetti(false), CONFETTI_DURATION_MS);
+
+    const award = xpForPath(path);
+    if (firstTime && award > 0) {
+      setXpAward(award);
+    }
 
     const milestone = milestones.find((m) => m.triggerPath === path);
     if (milestone) earnMilestone(milestone.id);
@@ -57,7 +62,9 @@ export default function ActivityPage() {
 
   return (
     <div className="mx-auto max-w-3xl px-8 py-10">
-      {showConfetti && <Confetti />}
+      {xpAward !== null && (
+        <XpCelebration amount={xpAward} onDone={() => setXpAward(null)} />
+      )}
       <nav className="mb-6 text-sm text-slate-400">
         <Link to="/" className="hover:text-slate-600">
           Dashboard

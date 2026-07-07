@@ -9,7 +9,8 @@ import {
   type ReactNode,
 } from "react";
 import { useCompletion } from "./CompletionContext";
-import { deriveRank, type Rank } from "../data/ranks";
+import { deriveRankFromXp, type Rank } from "../data/ranks";
+import { earnedXp } from "../lib/nextStep";
 
 const STORAGE_KEY = "crew-b:rank-state";
 
@@ -71,12 +72,13 @@ export function RankProvider({ children }: { children: ReactNode }) {
     }
   }, [state]);
 
-  // Derive the current rank from completion state + the dashboard milestone.
-  // `completedPaths` is in the dep list so this recomputes on every change.
+  // Derive the current rank from total XP earned across completed activities.
+  // `completedPaths` is in the dep list so this recomputes on every change
+  // (isComplete is derived from the same completion state).
   const currentRank = useMemo(
-    () => deriveRank(isComplete, state.dashboardVisited),
+    () => deriveRankFromXp(earnedXp(isComplete)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [completedPaths, state.dashboardVisited],
+    [completedPaths],
   );
 
   // Detect upward transitions: when the derived rank passes the highest rank we
