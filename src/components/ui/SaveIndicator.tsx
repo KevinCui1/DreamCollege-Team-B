@@ -5,7 +5,7 @@ import { cn } from "./cn";
 export type SaveState = "idle" | "saving" | "saved" | "error";
 
 /**
- * Non-intrusive autosave feedback. The "Saved" stamp is the almanac motif;
+ * Non-intrusive autosave feedback. The "Saved" stamp follows the lavender UI.
  * announced politely to screen readers and never steals focus.
  */
 export default function SaveIndicator({
@@ -26,13 +26,13 @@ export default function SaveIndicator({
       )}
     >
       {state === "saving" && (
-        <span className="flex items-center gap-1.5 text-graphite-muted">
+        <span className="flex items-center gap-1.5 text-ink-muted">
           <Loader2 size={14} className="animate-spin motion-reduce:animate-none" />
           Saving…
         </span>
       )}
       {state === "saved" && (
-        <span className="animate-stamp-in flex items-center gap-1 font-semibold uppercase tracking-[0.12em] text-sage">
+        <span className="animate-stamp-in flex items-center gap-1 font-semibold uppercase tracking-[0.12em] text-lavender-700">
           <Check size={14} strokeWidth={2.5} />
           Saved
         </span>

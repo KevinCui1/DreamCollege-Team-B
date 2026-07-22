@@ -1,7 +1,7 @@
 import { cn } from "./cn";
 
 /**
- * A calm "chapter ribbon" — thin marigold fill on a paper-deep track. This is
+ * A calm "chapter ribbon" — vivid-purple fill on a lavender track. This is
  * deliberately NOT a gamified XP bar (see DESIGN.md); it just orients the
  * student within a short collection flow.
  */
@@ -20,12 +20,12 @@ export default function ProgressRibbon({
   const pct = Math.min(100, Math.round((current / safeTotal) * 100));
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <div className="flex items-center justify-between font-body text-xs text-graphite-muted">
+      <div className="flex items-center justify-between font-body text-xs text-ink-muted">
         <span>{label ?? `Step ${Math.min(current, safeTotal)} of ${safeTotal}`}</span>
         <span className="tabular-nums">{pct}%</span>
       </div>
       <div
-        className="h-1.5 overflow-hidden rounded-full bg-paper-deep"
+        className="h-1.5 overflow-hidden rounded-full bg-lavender-100"
         role="progressbar"
         aria-valuenow={pct}
         aria-valuemin={0}
@@ -33,7 +33,7 @@ export default function ProgressRibbon({
         aria-label={label ?? "Collection progress"}
       >
         <div
-          className="h-full rounded-full bg-marigold transition-[width] duration-300 ease-out motion-reduce:transition-none"
+          className="h-full rounded-full bg-lavender-700 transition-[width] duration-300 ease-out motion-reduce:transition-none"
           style={{ width: `${pct}%` }}
         />
       </div>

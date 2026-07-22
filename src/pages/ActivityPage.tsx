@@ -31,10 +31,10 @@ export default function ActivityPage() {
   if (!match) {
     return (
       <div className="mx-auto max-w-3xl px-8 py-10">
-        <h1 className="font-serif text-2xl font-bold text-graphite">
+        <h1 className="font-serif text-2xl font-bold text-ink">
           Activity not found
         </h1>
-        <Link to="/" className="mt-4 inline-block text-evergreen hover:underline">
+        <Link to="/" className="mt-4 inline-block text-lavender-700 hover:underline">
           ← Back to dashboard
         </Link>
       </div>
@@ -72,24 +72,24 @@ export default function ActivityPage() {
       {xpAward !== null && (
         <XpCelebration amount={xpAward} onDone={() => setXpAward(null)} />
       )}
-      <nav className="mb-6 font-body text-sm text-graphite-soft">
-        <Link to="/" className="hover:text-graphite">
+      <nav className="mb-6 font-body text-sm text-ink-soft">
+        <Link to="/" className="hover:text-ink">
           Dashboard
         </Link>
         <span className="mx-2">/</span>
         <span>{group.label}</span>
         <span className="mx-2">/</span>
-        <span className="text-graphite-muted">{item.label}</span>
+        <span className="text-ink-muted">{item.label}</span>
       </nav>
 
-      <h1 className="font-serif text-3xl font-semibold text-graphite">{item.label}</h1>
+      <h1 className="font-serif text-3xl font-semibold text-ink">{item.label}</h1>
 
       {isQuiz ? (
-        <div className="mt-8 rounded-2xl border border-line bg-paper-card p-8 shadow-almanac">
+        <div className="mt-8 rounded-2xl border border-lavender-200/80 bg-white p-8 shadow-soft">
           <CareerDiscoveryQuiz done={done} onComplete={handleComplete} />
         </div>
       ) : !hydrated ? (
-        <div className="mt-8 flex items-center gap-2 font-body text-sm text-graphite-muted">
+        <div className="mt-8 flex items-center gap-2 font-body text-sm text-ink-muted">
           Loading your profile…
         </div>
       ) : isCollegeProfile ? (

@@ -53,7 +53,7 @@ export default function ProgressiveCollector({
       {/* Already saved — never re-asked, always editable. */}
       {reused.length > 0 && (
         <section className="flex flex-col gap-2.5">
-          <h3 className="font-body text-xs font-bold uppercase tracking-[0.14em] text-graphite-muted">
+          <h3 className="font-body text-xs font-bold uppercase tracking-[0.14em] text-ink-muted">
             We'll reuse what you've already saved
           </h3>
           <div className="flex flex-col gap-2">
@@ -73,7 +73,7 @@ export default function ProgressiveCollector({
       {/* Required-now fields. */}
       {required.length > 0 && (
         <section className="flex flex-col gap-5">
-          <h3 className="font-serif text-lg font-semibold text-graphite">
+          <h3 className="font-serif text-lg font-semibold text-ink">
             To tailor {toolLabel}, add:
           </h3>
           {required.map(({ field }, i) => (
@@ -91,7 +91,7 @@ export default function ProgressiveCollector({
             type="button"
             onClick={() => setShowOptional((v) => !v)}
             aria-expanded={showOptional}
-            className="flex items-center gap-2 self-start font-body text-sm font-semibold text-evergreen"
+            className="flex items-center gap-2 self-start font-body text-sm font-semibold text-lavender-800"
           >
             <Sparkle size={15} />
             {showOptional ? "Hide" : "Add"} optional details that sharpen {toolLabel}
@@ -101,7 +101,7 @@ export default function ProgressiveCollector({
             />
           </button>
           {showOptional && (
-            <div className="flex flex-col gap-5 border-l-2 border-line pl-4">
+            <div className="flex flex-col gap-5 border-l-2 border-lavender-200 pl-4">
               {useful.map(({ field }) => (
                 <FieldControl key={field.id} {...controlProps} field={field} />
               ))}
@@ -111,7 +111,7 @@ export default function ProgressiveCollector({
       )}
 
       {/* Footer: save state + proceed. */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-lavender-200 pt-5">
         <SaveIndicator state={saveState} onRetry={retrySave} />
         <Button
           variant="primary"
@@ -124,7 +124,7 @@ export default function ProgressiveCollector({
         </Button>
       </div>
       {!ready && (
-        <p className="-mt-3 font-body text-xs text-graphite-muted">
+        <p className="-mt-3 font-body text-xs text-ink-muted">
           Add the {required.length} field{required.length === 1 ? "" : "s"} above to
           continue. Optional details can wait.
         </p>

@@ -3,12 +3,12 @@ import { cn } from "./cn";
 
 type CardProps = HTMLAttributes<HTMLDivElement> & { children: ReactNode };
 
-/** Warm paper surface with a hairline border and soft almanac shadow. */
+/** Shared white card with the app's lavender border and soft shadow. */
 export default function Card({ className, children, ...rest }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-2xl border border-line bg-paper-card shadow-almanac",
+        "rounded-2xl border border-lavender-200/80 bg-white shadow-soft",
         className,
       )}
       {...rest}
@@ -19,7 +19,7 @@ export default function Card({ className, children, ...rest }: CardProps) {
 }
 
 /**
- * Almanac section heading with the signature evergreen ruled underline.
+ * Lavender section heading used across profile and setup surfaces.
  * `as` lets callers keep a correct heading hierarchy (h1→h3).
  */
 export function SectionTitle({
@@ -34,13 +34,13 @@ export function SectionTitle({
   className?: string;
 }) {
   return (
-    <div className={cn("border-b border-evergreen/25 pb-2", className)}>
+    <div className={cn("border-b border-lavender-200 pb-2", className)}>
       {eyebrow ? (
-        <p className="mb-1 font-body text-[11px] font-bold uppercase tracking-[0.16em] text-evergreen">
+        <p className="mb-1 font-body text-[11px] font-bold uppercase tracking-[0.16em] text-lavender-700">
           {eyebrow}
         </p>
       ) : null}
-      <Tag className="font-serif text-2xl font-semibold leading-tight text-graphite">
+      <Tag className="font-serif text-2xl font-semibold leading-tight text-ink">
         {children}
       </Tag>
     </div>
@@ -50,7 +50,7 @@ export function SectionTitle({
 /** Quiet "reason for asking" note — muted ink, never a modal (see DESIGN.md). */
 export function ReasonNote({ children, id }: { children: ReactNode; id?: string }) {
   return (
-    <p id={id} className="font-body text-sm leading-relaxed text-graphite-muted">
+    <p id={id} className="font-body text-sm leading-relaxed text-ink-muted">
       {children}
     </p>
   );

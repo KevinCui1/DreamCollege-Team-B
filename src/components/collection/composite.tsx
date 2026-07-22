@@ -117,8 +117,8 @@ export function ExamsEditor({ app, onPatch }: { app: ApplicationProfile; onPatch
             className={
               "rounded-xl border px-4 py-2 font-body text-sm font-semibold transition-colors " +
               (app.examType === t
-                ? "border-evergreen bg-evergreen-50 text-graphite"
-                : "border-line text-graphite-muted hover:border-evergreen-200")
+                ? "border-lavender-600 bg-lavender-100 text-ink"
+                : "border-lavender-200 bg-white text-ink-muted hover:border-lavender-400")
             }
           >
             {t}
@@ -166,7 +166,7 @@ export function ExamsEditor({ app, onPatch }: { app: ApplicationProfile; onPatch
             type="button"
             aria-label="Remove exam"
             onClick={() => setRows(rows.filter((_, idx) => idx !== i))}
-            className="rounded-lg p-2 text-graphite-soft hover:bg-paper-deep hover:text-oxblood"
+            className="rounded-lg p-2 text-ink-soft hover:bg-lavender-100 hover:text-oxblood"
           >
             <Trash2 size={16} />
           </button>
@@ -202,7 +202,7 @@ export function AwardsEditor({ app, onPatch }: { app: ApplicationProfile; onPatc
       {(rows.length ? rows : [emptyAward]).map((row, i) => (
         <div
           key={i}
-          className="grid gap-3 rounded-xl border border-line bg-paper-card p-4 sm:grid-cols-2"
+          className="grid gap-3 rounded-xl border border-lavender-200 bg-lavender-50/60 p-4 sm:grid-cols-2"
         >
           <div className="flex flex-col gap-1.5 sm:col-span-2">
             <Label htmlFor={`award-${i}`}>Award name</Label>
@@ -235,7 +235,7 @@ export function AwardsEditor({ app, onPatch }: { app: ApplicationProfile; onPatc
             <button
               type="button"
               onClick={() => setRows(rows.filter((_, idx) => idx !== i))}
-              className="flex items-center gap-1 justify-self-start font-body text-xs text-graphite-soft hover:text-oxblood sm:col-span-2"
+              className="flex items-center gap-1 justify-self-start font-body text-xs text-ink-soft hover:text-oxblood sm:col-span-2"
             >
               <Trash2 size={14} /> Remove
             </button>
@@ -278,7 +278,7 @@ export function ActivitiesEditor({ app, onPatch }: { app: ApplicationProfile; on
   return (
     <div className="flex flex-col gap-4">
       {(rows.length ? rows : [emptyActivity]).map((row, i) => (
-        <div key={i} className="grid gap-3 rounded-xl border border-line bg-paper-card p-4 sm:grid-cols-2">
+        <div key={i} className="grid gap-3 rounded-xl border border-lavender-200 bg-lavender-50/60 p-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1.5">
             <Label htmlFor={`act-type-${i}`}>Activity type</Label>
             <Select
@@ -324,7 +324,7 @@ export function ActivitiesEditor({ app, onPatch }: { app: ApplicationProfile; on
             <button
               type="button"
               onClick={() => setRows(rows.filter((_, idx) => idx !== i))}
-              className="flex items-center gap-1 justify-self-start font-body text-xs text-graphite-soft hover:text-oxblood sm:col-span-2"
+              className="flex items-center gap-1 justify-self-start font-body text-xs text-ink-soft hover:text-oxblood sm:col-span-2"
             >
               <Trash2 size={14} /> Remove
             </button>

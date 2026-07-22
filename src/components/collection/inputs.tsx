@@ -2,11 +2,11 @@ import type { ReactNode } from "react";
 import { Check } from "lucide-react";
 import { cn } from "../ui/cn";
 
-/** Shared almanac input shell — paper fill, hairline border, evergreen focus. */
+/** Shared setup input shell — white surface, lavender border, vivid-purple focus. */
 export const inputClass =
-  "w-full rounded-xl border border-line bg-paper-card px-3.5 py-2.5 font-body text-[15px] text-graphite " +
-  "outline-none transition-colors placeholder:text-graphite-soft " +
-  "focus:border-evergreen focus:ring-2 focus:ring-evergreen/20 " +
+  "w-full rounded-xl border border-lavender-200 bg-white px-3.5 py-2.5 font-body text-[15px] text-ink " +
+  "outline-none transition-colors placeholder:text-ink-soft " +
+  "focus:border-lavender-600 focus:ring-2 focus:ring-lavender-200 " +
   "aria-[invalid=true]:border-oxblood aria-[invalid=true]:focus:ring-oxblood/20";
 
 export function Label({
@@ -21,11 +21,11 @@ export function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="flex items-baseline gap-2 font-body text-sm font-semibold text-graphite"
+      className="flex items-baseline gap-2 font-body text-sm font-semibold text-ink"
     >
       {children}
       {optional ? (
-        <span className="font-normal text-graphite-soft">optional</span>
+        <span className="font-normal text-ink-soft">optional</span>
       ) : null}
     </label>
   );
@@ -81,7 +81,7 @@ export function TextInput({
         className={cn(inputClass, "min-h-[44px]")}
       />
       {suffix ? (
-        <span className="shrink-0 font-body text-xs text-graphite-muted">{suffix}</span>
+        <span className="shrink-0 font-body text-xs text-ink-muted">{suffix}</span>
       ) : null}
     </div>
   );
@@ -115,7 +115,7 @@ export function TextArea({
         className={cn(inputClass, "resize-y")}
       />
       {maxLength ? (
-        <span className="self-end font-body text-[11px] tabular-nums text-graphite-soft">
+        <span className="self-end font-body text-[11px] tabular-nums text-ink-soft">
           {value.length}/{maxLength}
         </span>
       ) : null}
@@ -156,7 +156,7 @@ export function Select({
       className={cn(inputClass, "min-h-[44px] appearance-none bg-[right_0.75rem_center] bg-no-repeat pr-9")}
       style={{
         backgroundImage:
-          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B6459' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
+          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236B5E92' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E\")",
       }}
     >
       <option value="">{placeholder}</option>
@@ -194,8 +194,8 @@ export function CheckboxGroup({
                 "flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2",
                 "font-body text-sm transition-colors",
                 checked
-                  ? "border-evergreen bg-evergreen-50 text-graphite"
-                  : "border-line bg-paper-card text-graphite-muted hover:border-evergreen-200",
+                  ? "border-lavender-600 bg-lavender-100 text-ink"
+                  : "border-lavender-200 bg-white text-ink-muted hover:border-lavender-400 hover:bg-lavender-50",
               )}
             >
               <input
@@ -208,7 +208,7 @@ export function CheckboxGroup({
                 aria-hidden
                 className={cn(
                   "flex h-4 w-4 items-center justify-center rounded border",
-                  checked ? "border-evergreen bg-evergreen text-white" : "border-line",
+                  checked ? "border-lavender-700 bg-lavender-700 text-white" : "border-lavender-300",
                 )}
               >
                 {checked ? <Check size={12} strokeWidth={3} /> : null}

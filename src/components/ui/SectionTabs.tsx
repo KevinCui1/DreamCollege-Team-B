@@ -38,7 +38,7 @@ export default function SectionTabs({
       aria-orientation="horizontal"
       onKeyDown={handleKey}
       className={cn(
-        "flex flex-wrap gap-x-1 gap-y-2 border-b border-line",
+        "flex flex-wrap gap-x-1 gap-y-2 border-b border-lavender-200",
         className,
       )}
     >
@@ -55,15 +55,15 @@ export default function SectionTabs({
             className={cn(
               "-mb-px flex items-center gap-2 rounded-t-lg border-b-2 px-3.5 py-2.5",
               "font-body text-sm font-semibold outline-none transition-colors",
-              "focus-visible:ring-2 focus-visible:ring-evergreen focus-visible:ring-offset-1 focus-visible:ring-offset-paper",
+              "focus-visible:ring-2 focus-visible:ring-lavender-500 focus-visible:ring-offset-1 focus-visible:ring-offset-lavender-50",
               active
-                ? "border-marigold text-graphite"
-                : "border-transparent text-graphite-muted hover:text-graphite",
+                ? "border-lavender-700 text-lavender-800"
+                : "border-transparent text-ink-muted hover:text-ink",
             )}
           >
             {tab.label}
             {tab.hint ? (
-              <span className="rounded-full bg-paper-deep px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-graphite-muted">
+              <span className="rounded-full bg-lavender-100 px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-ink-muted">
                 {tab.hint}
               </span>
             ) : null}

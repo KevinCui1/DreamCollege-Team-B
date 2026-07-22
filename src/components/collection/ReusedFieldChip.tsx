@@ -25,7 +25,7 @@ export default function ReusedFieldChip({
 
   if (editing) {
     return (
-      <div className="rounded-xl border border-line bg-paper-card p-4">
+      <div className="rounded-xl border border-lavender-200 bg-white p-4">
         <FieldControl
           field={field}
           app={snapshot.app}
@@ -37,7 +37,7 @@ export default function ReusedFieldChip({
         <button
           type="button"
           onClick={() => setEditing(false)}
-          className="mt-3 font-body text-xs font-semibold text-evergreen hover:underline"
+          className="mt-3 font-body text-xs font-semibold text-lavender-800 hover:underline"
         >
           Done
         </button>
@@ -46,18 +46,18 @@ export default function ReusedFieldChip({
   }
 
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl bg-paper-deep px-3.5 py-2.5">
-      <span className="flex min-w-0 items-center gap-2 font-body text-sm text-graphite">
-        <Check size={15} className="shrink-0 text-sage" strokeWidth={2.5} />
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-lavender-50 px-3.5 py-2.5">
+      <span className="flex min-w-0 items-center gap-2 font-body text-sm text-ink">
+        <Check size={15} className="shrink-0 text-lavender-700" strokeWidth={2.5} />
         <span className="truncate">
-          <span className="text-graphite-muted">{field.label}:</span>{" "}
+          <span className="text-ink-muted">{field.label}:</span>{" "}
           {summarizeField(field, snapshot)}
         </span>
       </span>
       <button
         type="button"
         onClick={() => setEditing(true)}
-        className="flex shrink-0 items-center gap-1 rounded font-body text-xs font-semibold text-evergreen outline-none hover:underline focus-visible:ring-2 focus-visible:ring-evergreen"
+        className="flex shrink-0 items-center gap-1 rounded font-body text-xs font-semibold text-lavender-800 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-lavender-500"
       >
         <Pencil size={13} /> Edit
       </button>

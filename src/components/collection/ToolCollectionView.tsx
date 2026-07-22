@@ -39,31 +39,31 @@ export default function ToolCollectionView({
     return (
       <Card className="mt-8 p-7 sm:p-9">
         <div className="flex flex-col gap-5">
-          <span className="inline-flex items-center gap-2 self-start rounded-full bg-evergreen-50 px-3 py-1 font-body text-xs font-semibold uppercase tracking-[0.12em] text-evergreen">
+          <span className="inline-flex items-center gap-2 self-start rounded-full bg-lavender-100 px-3 py-1 font-body text-xs font-semibold uppercase tracking-[0.12em] text-lavender-800">
             <CheckCircle2 size={14} /> Ready
           </span>
-          <h2 className="font-serif text-2xl font-semibold text-graphite">
+          <h2 className="font-serif text-2xl font-semibold text-ink">
             {item.label} has what it needs.
           </h2>
-          <p className="max-w-prose font-body text-[15px] leading-relaxed text-graphite-muted">
+          <p className="max-w-prose font-body text-[15px] leading-relaxed text-ink-muted">
             We've saved everything for {item.label.toLowerCase()} to your profile
             and will reuse it here. The full {item.label} experience is coming
             soon — your inputs are ready and waiting.
           </p>
 
           {reused.length > 0 && (
-            <div className="rounded-xl border border-line bg-paper-deep/60 p-4">
-              <p className="mb-2 font-body text-xs font-bold uppercase tracking-[0.12em] text-graphite-muted">
+            <div className="rounded-xl border border-lavender-200 bg-lavender-50 p-4">
+              <p className="mb-2 font-body text-xs font-bold uppercase tracking-[0.12em] text-ink-muted">
                 What this tool will use
               </p>
               <ul className="flex flex-col gap-1.5">
                 {reused.slice(0, 6).map((field) => (
                   <li
                     key={field.id}
-                    className="flex items-center gap-2 font-body text-sm text-graphite"
+                    className="flex items-center gap-2 font-body text-sm text-ink"
                   >
-                    <Sparkle size={13} className="text-marigold" />
-                    <span className="text-graphite-muted">{field.label}:</span>{" "}
+                    <Sparkle size={13} className="text-lavender-600" />
+                    <span className="text-ink-muted">{field.label}:</span>{" "}
                     {summarizeField(field, snapshot)}
                   </li>
                 ))}
@@ -86,7 +86,7 @@ export default function ToolCollectionView({
           <SectionTitle eyebrow={group.label} as="h2">
             Let's set up {item.label}
           </SectionTitle>
-          <p className="max-w-prose font-body text-[15px] leading-relaxed text-graphite-muted">
+          <p className="max-w-prose font-body text-[15px] leading-relaxed text-ink-muted">
             {shortPurpose(item.purpose)}. First, a few details make it genuinely
             useful — we'll only ask for what you haven't shared yet.
           </p>

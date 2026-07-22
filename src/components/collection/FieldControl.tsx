@@ -65,13 +65,13 @@ export default function FieldControl({
       <div className="flex flex-col gap-2.5">
         {header}
         {quizTaken ? (
-          <span className="inline-flex items-center gap-2 font-body text-sm text-sage">
+          <span className="inline-flex items-center gap-2 font-body text-sm text-lavender-700">
             <CheckCircle2 size={16} /> You've completed the quiz.
           </span>
         ) : (
           <Link
             to="/career-planning/career-discovery-quiz"
-            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-xl bg-marigold-700 px-4 py-2.5 font-body text-sm font-semibold text-white outline-none hover:bg-marigold-800 focus-visible:ring-2 focus-visible:ring-marigold-700 focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            className="inline-flex min-h-[44px] items-center gap-2 self-start rounded-xl bg-lavender-700 px-4 py-2.5 font-body text-sm font-semibold text-white outline-none hover:bg-lavender-800 focus-visible:ring-2 focus-visible:ring-lavender-500 focus-visible:ring-offset-2 focus-visible:ring-offset-lavender-50"
           >
             Take the 5-question quiz <ArrowRight size={16} />
           </Link>
