@@ -3,7 +3,7 @@ import { isSupabaseConfigured } from "./env";
 import { supabaseProfileStore } from "./supabaseStore";
 import { localProfileStore } from "./localStore";
 
-export type { ProfileBundle, ProfileStore } from "./types";
+export type { ProfileBundle, ProfileStore, InputSnapshot } from "./types";
 export { isSupabaseConfigured } from "./env";
 
 /**

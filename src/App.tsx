@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Route, Routes } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import RankUpOverlay from "./components/RankUpOverlay";
@@ -21,11 +21,25 @@ export default function App() {
   );
 
   // First-run welcome: shown once the account bundle has loaded and the student
-  // hasn't given the essentials yet. Replaces the old six-page profile gate.
+  // hasn't given the essentials yet. Once opened, it stays mounted through the
+  // final field so its completion scene can finish before revealing the app.
   const { hydrated, applicationProfile } = useStudentProfile();
+  const [welcomeActive, setWelcomeActive] = useState(false);
   const [welcomeDismissed, setWelcomeDismissed] = useState(false);
-  const showWelcome =
-    hydrated && !welcomeDismissed && !isOnboarded(applicationProfile);
+
+  useEffect(() => {
+    if (hydrated && !isOnboarded(applicationProfile)) {
+      setWelcomeActive(true);
+      setWelcomeDismissed(false);
+    }
+  }, [hydrated, applicationProfile]);
+
+  const showWelcome = hydrated && welcomeActive && !welcomeDismissed;
+
+  const finishWelcome = () => {
+    setWelcomeDismissed(true);
+    setWelcomeActive(false);
+  };
 
   return (
     <div className="relative flex h-full overflow-hidden bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-50">
@@ -54,7 +68,7 @@ export default function App() {
       {/* Always-visible control to wipe all saved progress. */}
       <ResetButton />
       {/* First-run welcome overlay — a brief, low-friction personalization flow. */}
-      {showWelcome && <WelcomeFlow onComplete={() => setWelcomeDismissed(true)} />}
+      {showWelcome && <WelcomeFlow onComplete={finishWelcome} />}
     </div>
   );
 }

@@ -5,6 +5,18 @@ import type {
 } from "../../context/StudentProfileContext";
 
 /**
+ * A snapshot of student-entered inputs (College Profile + quiz), saved right
+ * before "Reset progress" clears the live profile so it can be brought back
+ * with "Restore Inputs". Deliberately excludes completion/rank/achievement
+ * progress — those are not "inputs" and reset independently.
+ */
+export type InputSnapshot = {
+  application: ApplicationProfile;
+  quiz: QuizAnswers | null;
+  savedAt: string;
+};
+
+/**
  * The full set of account-linked student data persisted as one unit. The three
  * slices mirror the context's state so the store can be swapped (Supabase vs
  * local) without the rest of the app knowing which backend is live.
@@ -13,6 +25,8 @@ export type ProfileBundle = {
   application: ApplicationProfile;
   quiz: QuizAnswers | null;
   legacy: StudentProfile;
+  /** Most recent pre-reset snapshot, if any; restorable via "Restore Inputs". */
+  backup?: InputSnapshot | null;
 };
 
 /**

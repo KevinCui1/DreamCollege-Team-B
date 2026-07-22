@@ -9,7 +9,11 @@ import {
   type ReactNode,
 } from "react";
 import { useAuth } from "./AuthContext";
-import { getProfileStore, type ProfileBundle } from "../lib/persistence";
+import {
+  getProfileStore,
+  type ProfileBundle,
+  type InputSnapshot,
+} from "../lib/persistence";
 import { getField } from "../profile/fields";
 import { deriveLegacyProfile } from "../profile/deriveLegacy";
 import type { SaveState } from "../components/ui/SaveIndicator";
@@ -200,8 +204,16 @@ type StudentProfileContextValue = {
   updateApplicationProfile: (patch: Partial<ApplicationProfile>) => void;
   /** Registry-driven setter for a single scalar/multiselect field by id. */
   answerField: (fieldId: string, value: string | string[]) => void;
-  /** Wipe quiz answers and profile inputs (called from the reset control). */
-  resetProfile: () => void;
+  /**
+   * Snapshot the current College Profile + quiz answers, then wipe them to a
+   * true blank slate (called from the reset control). The snapshot is saved
+   * durably before this resolves, so it survives an immediate page reload.
+   */
+  resetProfile: () => Promise<void>;
+  /** True once a snapshot exists that "Restore Inputs" can bring back. */
+  hasBackup: boolean;
+  /** Restore the most recently saved College Profile + quiz snapshot. */
+  restoreProfile: () => void;
   /** Non-intrusive autosave lifecycle for the "Saved" indicator. */
   saveState: SaveState;
   /** Force a save after a recoverable error. */
@@ -261,6 +273,11 @@ function bundleHasData(b: ProfileBundle): boolean {
   });
 }
 
+/** Is this application profile indistinguishable from a fresh/empty one? */
+function isApplicationEmpty(app: ApplicationProfile): boolean {
+  return JSON.stringify(app) === JSON.stringify(emptyApplicationProfile);
+}
+
 export function StudentProfileProvider({ children }: { children: ReactNode }) {
   const { userId, loading: authLoading } = useAuth();
   const store = useMemo(getProfileStore, []);
@@ -269,6 +286,7 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<StudentProfile>(emptyProfile);
   const [applicationProfile, setApplicationProfile] =
     useState<ApplicationProfile>(emptyApplicationProfile);
+  const [backup, setBackup] = useState<InputSnapshot | null>(null);
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [hydrated, setHydrated] = useState(false);
 
@@ -304,6 +322,7 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
       setQuizAnswersState(bundle.quiz);
       setProfile({ ...emptyProfile, ...bundle.legacy });
       setApplicationProfile({ ...emptyApplicationProfile, ...bundle.application });
+      setBackup(bundle.backup ?? null);
       setSaveState("idle");
       skipSaveRef.current = true; // don't re-save the freshly-loaded state
       hydratedRef.current = true;
@@ -327,6 +346,7 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
       application: applicationProfile,
       quiz: quizAnswers,
       legacy: profile,
+      backup,
     };
     const timer = setTimeout(() => {
       store
@@ -335,7 +355,7 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
         .catch(() => setSaveState("error"));
     }, 600);
     return () => clearTimeout(timer);
-  }, [quizAnswers, profile, applicationProfile, userId, store]);
+  }, [quizAnswers, profile, applicationProfile, backup, userId, store]);
 
   // Fade the "Saved" stamp back to idle so it stays quiet.
   useEffect(() => {
@@ -365,12 +385,13 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
       application: applicationProfile,
       quiz: quizAnswers,
       legacy: profile,
+      backup,
     };
     store
       .save(userId, bundle)
       .then(() => setSaveState("saved"))
       .catch(() => setSaveState("error"));
-  }, [applicationProfile, quizAnswers, profile, userId, store]);
+  }, [applicationProfile, quizAnswers, profile, backup, userId, store]);
 
   const setQuizAnswers = useCallback((answers: QuizAnswers) => {
     setQuizAnswersState(answers);
@@ -396,12 +417,42 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const resetProfile = useCallback(() => {
-    // Deliberately preserve the structured College Profile (`applicationProfile`)
-    // so resetting progress never wipes the user's saved profile inputs.
+  const resetProfile = useCallback(async () => {
+    // Snapshot current inputs before wiping them, unless there's nothing to
+    // save (never overwrite a real prior backup with an empty one).
+    const hasCurrentData = !isApplicationEmpty(applicationProfile) || quizAnswers !== null;
+    const nextBackup: InputSnapshot | null = hasCurrentData
+      ? { application: applicationProfile, quiz: quizAnswers, savedAt: new Date().toISOString() }
+      : backup;
+
+    setBackup(nextBackup);
     setQuizAnswersState(null);
     setProfile(emptyProfile);
-  }, []);
+    setApplicationProfile(emptyApplicationProfile);
+
+    // Persist immediately (don't rely on the debounced autosave) so the
+    // snapshot and the clear are durable before the caller reloads the page.
+    const bundle: ProfileBundle = {
+      application: emptyApplicationProfile,
+      quiz: null,
+      legacy: emptyProfile,
+      backup: nextBackup,
+    };
+    try {
+      await store.save(userId, bundle);
+    } catch {
+      // Best-effort, same as autosave — the local mirror already attempted
+      // a write; nothing more useful to do before the page reloads.
+    }
+  }, [applicationProfile, quizAnswers, backup, userId, store]);
+
+  const restoreProfile = useCallback(() => {
+    if (!backup) return;
+    setApplicationProfile(backup.application);
+    setQuizAnswersState(backup.quiz);
+    // Legacy `profile` re-derives automatically from the effect above.
+    // `backup` itself is left untouched so it can be restored again later.
+  }, [backup]);
 
   const value = useMemo<StudentProfileContextValue>(
     () => ({
@@ -413,6 +464,8 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
       updateApplicationProfile,
       answerField,
       resetProfile,
+      hasBackup: backup !== null,
+      restoreProfile,
       saveState,
       retrySave,
       hydrated,
@@ -426,6 +479,8 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
       updateApplicationProfile,
       answerField,
       resetProfile,
+      backup,
+      restoreProfile,
       saveState,
       retrySave,
       hydrated,
