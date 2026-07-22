@@ -40,6 +40,7 @@ import {
   type SectionPick,
 } from "../lib/roadmap";
 import { findSectionBySlug } from "../data/navigation";
+import { isOnboarded } from "../onboarding/config";
 import { softCard, eyebrow } from "../theme";
 import { useFeedback } from "../context/FeedbackContext";
 import { roadmapFeedback } from "../data/feedbackQuestions";
@@ -47,7 +48,7 @@ import { roadmapFeedback } from "../data/feedbackQuestions";
 export default function JourneyTimeline() {
   const { isComplete, completedPaths } = useCompletion();
   const { gradeAchievements } = useAchievement();
-  const { quizAnswers, profile } = useStudentProfile();
+  const { quizAnswers, profile, applicationProfile } = useStudentProfile();
   const { triggerFeedback } = useFeedback();
 
   const itemDone = useMemo(
@@ -59,9 +60,12 @@ export default function JourneyTimeline() {
     [itemDone],
   );
 
-  const profileComplete = isComplete("/college-planning/college-profile");
+  // The roadmap is unlocked by the low-friction essentials + the quiz — not the
+  // old six-page College Profile. The rest of the profile is gathered
+  // contextually, so we no longer gate on a monolithic "profile complete".
+  const onboardComplete = isOnboarded(applicationProfile);
   const quizComplete = quizAnswers !== null;
-  const setupDone = profileComplete && quizComplete;
+  const setupDone = onboardComplete && quizComplete;
 
   const [roadmap, setRoadmap] = useState<GeneratedRoadmap | null>(() =>
     loadRoadmap(),
@@ -129,7 +133,7 @@ export default function JourneyTimeline() {
   if (!setupDone) {
     return (
       <SetupStarterCard
-        profileComplete={profileComplete}
+        onboardComplete={onboardComplete}
         quizComplete={quizComplete}
       />
     );
@@ -378,16 +382,16 @@ function SectionPicksList({ picks }: { picks: SectionPick[] }) {
 // ── Phase 1: Setup starter card ──────────────────────────────────────────────
 
 function SetupStarterCard({
-  profileComplete,
+  onboardComplete,
   quizComplete,
 }: {
-  profileComplete: boolean;
+  onboardComplete: boolean;
   quizComplete: boolean;
 }) {
-  const firstIncompleteHref = !profileComplete
-    ? "/college-planning/college-profile"
-    : "/career-planning/career-discovery-quiz";
-  const ctaLabel = !profileComplete ? "Start your profile" : "Take the quiz";
+  // By the time this shows, the welcome overlay has handled the essentials, so
+  // the remaining actionable step is the quiz.
+  const firstIncompleteHref = "/career-planning/career-discovery-quiz";
+  const ctaLabel = "Take the quiz";
 
   return (
     <section className="relative overflow-hidden rounded-3xl border border-lavender-300/60 bg-gradient-to-br from-lavender-600 to-lavender-800 p-7 text-white shadow-soft-lg">
@@ -409,7 +413,7 @@ function SetupStarterCard({
         </div>
 
         <ul className="space-y-3">
-          <SetupRow done={profileComplete} icon={User} label="Complete your profile" />
+          <SetupRow done={onboardComplete} icon={User} label="Tell us a little about you" />
           <SetupRow done={quizComplete} icon={Briefcase} label="Take the Career Discovery Quiz" />
         </ul>
 

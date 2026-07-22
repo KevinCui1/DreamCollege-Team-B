@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:"Helvetica Neue",Helvetica,Arial,sans-serif}
+  body{background:#333;padding:20px}
+  /* 13.33in x 7.5in at 96dpi = 1280 x 720 */
+  .slide{position:relative;width:1280px;height:720px;background:#FDFCFF;overflow:hidden}
+  .abs{position:absolute}
+  /* helper: inches->px = *96 */
+</style></head><body><div class="slide" id="s"></div>
+<script>
+const S=96; // px per inch
+const el=document.getElementById('s');
+function box(x,y,w,h,css){const d=document.createElement('div');d.className='abs';d.style.left=x*S+'px';d.style.top=y*S+'px';d.style.width=w*S+'px';d.style.height=h*S+'px';Object.assign(d.style,css);el.appendChild(d);return d;}
+function txt(x,y,w,h,t,css){const d=box(x,y,w,h,{display:'flex',alignItems:(css&&css.valign)||'flex-start',...css});d.style.whiteSpace='normal';const s=document.createElement('div');s.innerHTML=t;s.style.width='100%';if(css&&css.align)s.style.textAlign=css.align;d.appendChild(s);return d;}
+const PURPLE='#6D28D9',PD='#5B21B6',PS='#A78BFA',LAV='#EDE9FE',LAVLT='#F5F3FF',INK='#1E1B2E',MUT='#6A6380',SOFT='#9B94AD';
+// eyebrow
+box(0.7,0.5,3.05,0.42,{background:LAV,borderRadius:'21px',display:'flex',alignItems:'center',justifyContent:'center'}).innerHTML='<span style="color:'+PURPLE+';font-size:11px;font-weight:700;letter-spacing:2px">MY WORK · RANK SYSTEM</span>';
+// title
+txt(0.66,1.05,6.5,1.35,'Turning a checklist into a game',{color:INK,fontSize:'40px',fontWeight:'700',lineHeight:'0.98'});
+// subtitle
+txt(0.7,2.42,6.25,0.9,'The rank system is the heart of our gamification goal: every completed activity earns XP, and XP unlocks ranks — so progress is something students can see, feel, and chase.',{color:MUT,fontSize:'14.5px',lineHeight:'1.15'});
+// ladder header
+txt(0.7,3.42,6.25,0.3,'THE RANK LADDER&nbsp;&nbsp;·&nbsp;&nbsp;DERIVED LIVE FROM XP',{color:PD,fontSize:'11px',fontWeight:'700',letterSpacing:'1.5px'});
+// ladder card
+box(0.7,3.78,6.25,2.28,{background:LAVLT,border:'1px solid '+LAV,borderRadius:'12px'});
+const ranks=[['Explorer','Your journey starts here.','0 XP'],['Planner',"Course charted — you know where you're headed.",'200 XP'],['Builder','Your career plan is taking shape.','400 XP'],['Launch Ready','Your applications are ready for liftoff.','700 XP']];
+const firstRowY=3.78+0.14,rowH=0.5;
+ranks.forEach((r,i)=>{const ry=firstRowY+i*(rowH+0.02);const bx=0.7+0.22,by=ry+0.03,bs=0.44;
+  const badge=box(bx,by,bs,bs,{background:PURPLE,borderRadius:'10px',display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 3px 8px rgba(91,33,182,0.3)'});
+  badge.innerHTML='<svg width="26" height="26" viewBox="0 0 26 26"><polyline points="7,16 13,10 19,16" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  txt(bx+bs+0.22,ry-0.02,3.7,0.26,r[0],{color:INK,fontSize:'15px',fontWeight:'700',valign:'center'});
+  txt(bx+bs+0.22,ry+0.24,4.0,0.24,r[1],{color:SOFT,fontSize:'10.5px',valign:'center'});
+  txt(0.7+6.25-1.35,ry,1.13,0.44,r[2],{color:PURPLE,fontSize:'15px',fontWeight:'700',align:'right',valign:'center'});
+});
+// why-it-works strip
+txt(0.7,6.25,6.25,0.55,'<b style="color:'+PD+'">Why it works:</b> <span style="color:'+MUT+'">ranks are always derived from XP (never stored), a full-screen </span><b style="color:'+INK+'">rank-up moment</b><span style="color:'+MUT+'"> fires once per level, and reset re-runs the whole journey.</span>',{fontSize:'12px',lineHeight:'1.1'});
+// RIGHT
+const rX=7.45,rW=5.15;
+txt(rX,0.55,rW,0.3,'THE RANK-UP SCREEN&nbsp;&nbsp;·&nbsp;&nbsp;MY DESIGN',{color:PD,fontSize:'11px',fontWeight:'700',letterSpacing:'1.5px'});
+const f1y=0.98,f1h=3.05;
+box(rX,f1y,rW,f1h,{background:LAVLT,border:'1.5px dashed '+PS,borderRadius:'10px'});
+txt(rX,f1y+1.05,rW,0.3,'RANK-UP CELEBRATION',{color:PURPLE,fontSize:'13px',fontWeight:'700',align:'center',letterSpacing:'1px'});
+txt(rX,f1y+1.4,rW,0.3,'▽&nbsp;&nbsp;drop screenshot here',{color:SOFT,fontSize:'12px',align:'center'});
+const chips=['Full-screen moment','Chevron insignia','Animated tier track','Fires once / rank'];
+const chipY=f1y+f1h+0.16,chipH=0.36,chipGap=0.12,chipW=(rW-chipGap)/2;
+chips.forEach((c,i)=>{const col=i%2,row=Math.floor(i/2);const cx=rX+col*(chipW+chipGap);const cy=chipY+row*(chipH+0.1);
+  const b=box(cx,cy,chipW,chipH,{background:LAV,borderRadius:'18px',display:'flex',alignItems:'center',justifyContent:'center'});
+  b.innerHTML='<span style="color:'+PD+';font-size:11.5px;font-weight:700">'+c+'</span>';});
+const f2y=chipY+2*chipH+0.1+0.18,f2h=7.5-f2y-0.62;
+box(rX,f2y,rW,f2h,{background:LAVLT,border:'1.5px dashed '+PS,borderRadius:'10px',display:'flex',alignItems:'center',justifyContent:'center'}).innerHTML='<div style="text-align:center"><div style="color:'+PURPLE+';font-size:13px;font-weight:700;letter-spacing:1px">EXPERIENCE BAR — DASHBOARD</div><div style="color:'+SOFT+';font-size:12px;margin-top:8px">▽&nbsp;&nbsp;drop screenshot here</div></div>';
+// footer
+box(0.7,7.0,11.93,0.01,{background:LAV,height:'1px'});
+txt(0.7,7.08,9,0.32,'<b style="color:'+PD+'">Also on me:</b> <span style="color:'+MUT+'">the project scaffold and the LLM integration</span><span style="color:'+SOFT+';font-style:italic">&nbsp;&nbsp;— covered in a later section.</span>',{fontSize:'11.5px',valign:'center'});
+txt(9.6,7.08,3.03,0.32,'Dream College&nbsp;&nbsp;·&nbsp;&nbsp;Rank System',{color:SOFT,fontSize:'10.5px',align:'right',valign:'center'});
+</script></body></html>

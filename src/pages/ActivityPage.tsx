@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { CheckCircle2 } from "lucide-react";
 import { activityPath, findActivity } from "../data/navigation";
 import { useCompletion } from "../context/CompletionContext";
+import { useStudentProfile } from "../context/StudentProfileContext";
 import XpCelebration from "../components/XpCelebration";
 import CareerDiscoveryQuiz from "../components/CareerDiscoveryQuiz";
-import CollegeProfileWizard from "../components/CollegeProfileWizard";
+import CollegeProfileHub from "../components/CollegeProfileHub";
+import ToolCollectionView from "../components/collection/ToolCollectionView";
 import { milestones } from "../data/achievements";
 import { useAchievement } from "../context/AchievementContext";
 import { useFeedback } from "../context/FeedbackContext";
@@ -14,12 +15,13 @@ import { xpForPath } from "../lib/nextStep";
 
 /** Slug of the activity that renders the interactive Career Discovery Quiz. */
 const CAREER_DISCOVERY_QUIZ_SLUG = "career-discovery-quiz";
-/** Slug of the activity that renders the College Profile form. */
+/** Slug of the activity that renders the College Profile review hub. */
 const COLLEGE_PROFILE_SLUG = "college-profile";
 
 export default function ActivityPage() {
   const { groupSlug, itemSlug } = useParams();
   const { isComplete, complete } = useCompletion();
+  const { hydrated } = useStudentProfile();
   const [xpAward, setXpAward] = useState<number | null>(null);
   const { earnMilestone } = useAchievement();
   const { triggerFeedback } = useFeedback();
@@ -29,8 +31,10 @@ export default function ActivityPage() {
   if (!match) {
     return (
       <div className="mx-auto max-w-3xl px-8 py-10">
-        <h1 className="text-2xl font-bold text-slate-800">Activity not found</h1>
-        <Link to="/" className="mt-4 inline-block text-indigo-600 hover:underline">
+        <h1 className="font-serif text-2xl font-bold text-graphite">
+          Activity not found
+        </h1>
+        <Link to="/" className="mt-4 inline-block text-evergreen hover:underline">
           ← Back to dashboard
         </Link>
       </div>
@@ -60,71 +64,43 @@ export default function ActivityPage() {
     }
   };
 
+  const isQuiz = item.slug === CAREER_DISCOVERY_QUIZ_SLUG;
   const isCollegeProfile = item.slug === COLLEGE_PROFILE_SLUG;
 
   return (
-    <div
-      className={`mx-auto px-8 py-10 ${isCollegeProfile ? "max-w-7xl" : "max-w-3xl"}`}
-    >
+    <div className="mx-auto max-w-5xl px-6 py-10 sm:px-8">
       {xpAward !== null && (
         <XpCelebration amount={xpAward} onDone={() => setXpAward(null)} />
       )}
-      <nav className="mb-6 text-sm text-slate-400">
-        <Link to="/" className="hover:text-slate-600">
+      <nav className="mb-6 font-body text-sm text-graphite-soft">
+        <Link to="/" className="hover:text-graphite">
           Dashboard
         </Link>
         <span className="mx-2">/</span>
         <span>{group.label}</span>
         <span className="mx-2">/</span>
-        <span className="text-slate-600">{item.label}</span>
+        <span className="text-graphite-muted">{item.label}</span>
       </nav>
 
-      <h1 className="text-3xl font-bold text-slate-800">{item.label}</h1>
-      <p className="mt-2 text-slate-500">
-        Part of <span className="font-medium text-slate-700">{group.label}</span>.
-      </p>
+      <h1 className="font-serif text-3xl font-semibold text-graphite">{item.label}</h1>
 
-      {/* The College Profile wizard supplies its own two-column card layout, so
-          it renders outside the default white content card. */}
-      {isCollegeProfile ? (
-        <CollegeProfileWizard done={done} onComplete={handleComplete} />
-      ) : (
-        <div className="mt-10 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          {item.slug === CAREER_DISCOVERY_QUIZ_SLUG ? (
-            <CareerDiscoveryQuiz done={done} onComplete={handleComplete} />
-          ) : done ? (
-            <div>
-              <div className="flex items-center gap-2 text-emerald-600">
-                <CheckCircle2 size={24} />
-                <span className="text-lg font-semibold">Activity completed</span>
-              </div>
-              <p className="mt-2 text-slate-500">
-                Nice work — this activity is marked complete and counts toward
-                your progress.
-              </p>
-              <button
-                type="button"
-                disabled
-                className="mt-6 cursor-default rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white opacity-90"
-              >
-                Completed ✓
-              </button>
-            </div>
-          ) : (
-            <div>
-              <p className="text-slate-600">
-                When you're ready, mark this activity as complete.
-              </p>
-              <button
-                type="button"
-                onClick={handleComplete}
-                className="mt-6 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-sm transition hover:from-indigo-500 hover:to-purple-500"
-              >
-                Complete Activity
-              </button>
-            </div>
-          )}
+      {isQuiz ? (
+        <div className="mt-8 rounded-2xl border border-line bg-paper-card p-8 shadow-almanac">
+          <CareerDiscoveryQuiz done={done} onComplete={handleComplete} />
         </div>
+      ) : !hydrated ? (
+        <div className="mt-8 flex items-center gap-2 font-body text-sm text-graphite-muted">
+          Loading your profile…
+        </div>
+      ) : isCollegeProfile ? (
+        <CollegeProfileHub done={done} onComplete={handleComplete} />
+      ) : (
+        <ToolCollectionView
+          group={group}
+          item={item}
+          done={done}
+          onComplete={handleComplete}
+        />
       )}
     </div>
   );

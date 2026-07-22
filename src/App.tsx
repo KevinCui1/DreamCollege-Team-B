@@ -9,6 +9,9 @@ import FeedbackWidget from "./components/FeedbackWidget";
 import DashboardHome from "./pages/DashboardHome";
 import ActivityPage from "./pages/ActivityPage";
 import AchievementMap from "./pages/AchievementMap";
+import WelcomeFlow from "./onboarding/WelcomeFlow";
+import { isOnboarded } from "./onboarding/config";
+import { useStudentProfile } from "./context/StudentProfileContext";
 
 export default function App() {
   // Start collapsed to the icon rail on small screens so the dashboard stays
@@ -16,6 +19,14 @@ export default function App() {
   const [collapsed, setCollapsed] = useState(
     () => typeof window !== "undefined" && window.innerWidth < 768,
   );
+
+  // First-run welcome: shown once the account bundle has loaded and the student
+  // hasn't given the essentials yet. Replaces the old six-page profile gate.
+  const { hydrated, applicationProfile } = useStudentProfile();
+  const [welcomeDismissed, setWelcomeDismissed] = useState(false);
+  const showWelcome =
+    hydrated && !welcomeDismissed && !isOnboarded(applicationProfile);
+
   return (
     <div className="relative flex h-full overflow-hidden bg-gradient-to-br from-lavender-50 via-lavender-100 to-lavender-50">
       {/* Ambient aurora glow orbs — sit behind everything, never intercept clicks. */}
@@ -42,6 +53,8 @@ export default function App() {
       <FeedbackWidget />
       {/* Always-visible control to wipe all saved progress. */}
       <ResetButton />
+      {/* First-run welcome overlay — a brief, low-friction personalization flow. */}
+      {showWelcome && <WelcomeFlow onComplete={() => setWelcomeDismissed(true)} />}
     </div>
   );
 }

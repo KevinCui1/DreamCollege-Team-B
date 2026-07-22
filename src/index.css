@@ -194,7 +194,9 @@ body {
   .animate-aurora-drift,
   .rankup-orbit,
   .rankup-halo,
-  .journey-here {
+  .journey-here,
+  .animate-stamp-in,
+  .animate-collect-in {
     animation: none !important;
   }
 }

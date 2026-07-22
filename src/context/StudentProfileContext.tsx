@@ -4,9 +4,15 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { useAuth } from "./AuthContext";
+import { getProfileStore, type ProfileBundle } from "../lib/persistence";
+import { getField } from "../profile/fields";
+import { deriveLegacyProfile } from "../profile/deriveLegacy";
+import type { SaveState } from "../components/ui/SaveIndicator";
 
 const QUIZ_KEY = "crew-b:quiz-answers";
 const PROFILE_KEY = "crew-b:student-profile";
@@ -119,6 +125,19 @@ export type ApplicationProfile = {
   awards: AwardEntry[];
   // Step 6 — Activities
   activities: ActivityEntry[];
+
+  // ── Controlled reusable additions (see src/profile/schema.ts EXTRA_FIELDS).
+  // Each was added only because it materially improves a tool's future LLM
+  // input and is reused across tools. All optional & default-empty so existing
+  // stored profiles migrate forward untouched.
+  /** A career the student already has in mind (Career Tracks/Fit, Majors). */
+  careerDirection: string;
+  /** Favorite subjects / academic strengths (Majors, Career Fit, High School Plan). */
+  favoriteSubjects: string[];
+  /** Courses in progress or planned (High School Plan, Application rigor signal). */
+  currentCourses: string;
+  /** One accomplishment/impact detail for a credible narrative (Positioning, Recs). */
+  accomplishmentDetail: string;
 };
 
 export const emptyApplicationProfile: ApplicationProfile = {
@@ -160,6 +179,10 @@ export const emptyApplicationProfile: ApplicationProfile = {
   prefOthers: "",
   awards: [],
   activities: [],
+  careerDirection: "",
+  favoriteSubjects: [],
+  currentCourses: "",
+  accomplishmentDetail: "",
 };
 
 type StudentProfileContextValue = {
@@ -175,8 +198,16 @@ type StudentProfileContextValue = {
   applicationProfile: ApplicationProfile;
   /** Merge a partial update into the stored application profile. */
   updateApplicationProfile: (patch: Partial<ApplicationProfile>) => void;
+  /** Registry-driven setter for a single scalar/multiselect field by id. */
+  answerField: (fieldId: string, value: string | string[]) => void;
   /** Wipe quiz answers and profile inputs (called from the reset control). */
   resetProfile: () => void;
+  /** Non-intrusive autosave lifecycle for the "Saved" indicator. */
+  saveState: SaveState;
+  /** Force a save after a recoverable error. */
+  retrySave: () => void;
+  /** False until the account-linked bundle has loaded for the current user. */
+  hydrated: boolean;
 };
 
 const StudentProfileContext = createContext<StudentProfileContextValue | null>(
@@ -220,38 +251,126 @@ function loadApplicationProfile(): ApplicationProfile {
   }
 }
 
+/** Does a legacy localStorage bundle hold anything worth migrating? */
+function bundleHasData(b: ProfileBundle): boolean {
+  if (b.quiz && Object.keys(b.quiz).length > 0) return true;
+  const app = b.application;
+  return Object.entries(app).some(([key, val]) => {
+    const empty = emptyApplicationProfile[key as keyof ApplicationProfile];
+    return JSON.stringify(val) !== JSON.stringify(empty);
+  });
+}
+
 export function StudentProfileProvider({ children }: { children: ReactNode }) {
-  const [quizAnswers, setQuizAnswersState] = useState<QuizAnswers | null>(
-    loadQuiz,
-  );
-  const [profile, setProfile] = useState<StudentProfile>(loadProfile);
+  const { userId, loading: authLoading } = useAuth();
+  const store = useMemo(getProfileStore, []);
+
+  const [quizAnswers, setQuizAnswersState] = useState<QuizAnswers | null>(null);
+  const [profile, setProfile] = useState<StudentProfile>(emptyProfile);
   const [applicationProfile, setApplicationProfile] =
-    useState<ApplicationProfile>(loadApplicationProfile);
+    useState<ApplicationProfile>(emptyApplicationProfile);
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => {
-    try {
-      if (quizAnswers === null) localStorage.removeItem(QUIZ_KEY);
-      else localStorage.setItem(QUIZ_KEY, JSON.stringify(quizAnswers));
-    } catch {
-      // Ignore storage failures (e.g. private mode); state stays in memory.
-    }
-  }, [quizAnswers]);
+  // Refs coordinate hydration vs. autosave so loading data never triggers a save.
+  const hydratedRef = useRef(false);
+  const skipSaveRef = useRef(false);
 
+  // ── Hydrate the account-linked bundle whenever the active user changes ──────
   useEffect(() => {
-    try {
-      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    } catch {
-      // Ignore storage failures; state stays in memory.
-    }
-  }, [profile]);
+    if (authLoading) return;
+    let cancelled = false;
+    hydratedRef.current = false;
+    setHydrated(false);
 
+    (async () => {
+      let bundle = await store.load(userId).catch(() => null);
+
+      if (!bundle) {
+        // First load for this user: migrate any pre-existing localStorage data
+        // (from before accounts existed) so no field is ever silently dropped.
+        const migrated: ProfileBundle = {
+          application: loadApplicationProfile(),
+          quiz: loadQuiz(),
+          legacy: loadProfile(),
+        };
+        bundle = migrated;
+        if (bundleHasData(migrated)) {
+          await store.save(userId, migrated).catch(() => {});
+        }
+      }
+
+      if (cancelled) return;
+      setQuizAnswersState(bundle.quiz);
+      setProfile({ ...emptyProfile, ...bundle.legacy });
+      setApplicationProfile({ ...emptyApplicationProfile, ...bundle.application });
+      setSaveState("idle");
+      skipSaveRef.current = true; // don't re-save the freshly-loaded state
+      hydratedRef.current = true;
+      setHydrated(true);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId, authLoading, store]);
+
+  // ── Debounced autosave with visible save-state ──────────────────────────────
   useEffect(() => {
-    try {
-      localStorage.setItem(APP_PROFILE_KEY, JSON.stringify(applicationProfile));
-    } catch {
-      // Ignore storage failures; state stays in memory.
+    if (!hydratedRef.current) return;
+    if (skipSaveRef.current) {
+      skipSaveRef.current = false;
+      return;
     }
+    setSaveState("saving");
+    const bundle: ProfileBundle = {
+      application: applicationProfile,
+      quiz: quizAnswers,
+      legacy: profile,
+    };
+    const timer = setTimeout(() => {
+      store
+        .save(userId, bundle)
+        .then(() => setSaveState("saved"))
+        .catch(() => setSaveState("error"));
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [quizAnswers, profile, applicationProfile, userId, store]);
+
+  // Fade the "Saved" stamp back to idle so it stays quiet.
+  useEffect(() => {
+    if (saveState !== "saved") return;
+    const t = setTimeout(() => setSaveState("idle"), 2200);
+    return () => clearTimeout(t);
+  }, [saveState]);
+
+  // Keep the flat legacy profile (consumed by the roadmap / best-next-task AI)
+  // continuously derived from the structured profile, so information collected
+  // in any tool immediately personalizes those features. Only writes when a
+  // derived value actually changes, to avoid an update loop.
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    const derived = deriveLegacyProfile(applicationProfile);
+    setProfile((prev) => {
+      const changed = (Object.keys(derived) as (keyof StudentProfile)[]).some(
+        (k) => prev[k] !== derived[k],
+      );
+      return changed ? { ...prev, ...derived } : prev;
+    });
   }, [applicationProfile]);
+
+  const retrySave = useCallback(() => {
+    setSaveState("saving");
+    const bundle: ProfileBundle = {
+      application: applicationProfile,
+      quiz: quizAnswers,
+      legacy: profile,
+    };
+    store
+      .save(userId, bundle)
+      .then(() => setSaveState("saved"))
+      .catch(() => setSaveState("error"));
+  }, [applicationProfile, quizAnswers, profile, userId, store]);
 
   const setQuizAnswers = useCallback((answers: QuizAnswers) => {
     setQuizAnswersState(answers);
@@ -264,6 +383,15 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
   const updateApplicationProfile = useCallback(
     (patch: Partial<ApplicationProfile>) => {
       setApplicationProfile((prev) => ({ ...prev, ...patch }));
+    },
+    [],
+  );
+
+  const answerField = useCallback(
+    (fieldId: string, value: string | string[]) => {
+      const field = getField(fieldId);
+      if (!field?.set) return; // composite fields update via updateApplicationProfile
+      setApplicationProfile((prev) => ({ ...prev, ...field.set!(value, prev) }));
     },
     [],
   );
@@ -283,7 +411,11 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
       updateProfile,
       applicationProfile,
       updateApplicationProfile,
+      answerField,
       resetProfile,
+      saveState,
+      retrySave,
+      hydrated,
     }),
     [
       quizAnswers,
@@ -292,7 +424,11 @@ export function StudentProfileProvider({ children }: { children: ReactNode }) {
       updateProfile,
       applicationProfile,
       updateApplicationProfile,
+      answerField,
       resetProfile,
+      saveState,
+      retrySave,
+      hydrated,
     ],
   );
 
@@ -311,4 +447,16 @@ export function useStudentProfile() {
     );
   }
   return ctx;
+}
+
+/**
+ * Convenience view of the current profile for the field registry / completeness
+ * helpers (which take a `{ app, quiz }` snapshot).
+ */
+export function useProfileSnapshot() {
+  const { applicationProfile, quizAnswers } = useStudentProfile();
+  return useMemo(
+    () => ({ app: applicationProfile, quiz: quizAnswers }),
+    [applicationProfile, quizAnswers],
+  );
 }
